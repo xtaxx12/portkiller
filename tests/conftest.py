@@ -1,22 +1,22 @@
 """
 Pytest Configuration and Fixtures for PortKiller tests.
 """
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from fastapi.testclient import TestClient
-import psutil
-
 # Import the app and services
 import sys
 from pathlib import Path
+from unittest.mock import Mock, patch
+
+import psutil
+import pytest
+from fastapi.testclient import TestClient
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from main import app
-from app.models.port import PortInfo, SystemStats, ActionLog, ProcessKillResponse
+from app.models.port import PortInfo
 from app.services.port_scanner import PortScannerService
 from app.services.process_manager import ProcessManagerService
+from main import app
 
 
 @pytest.fixture

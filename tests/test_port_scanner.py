@@ -1,13 +1,12 @@
 """
 Unit tests for the PortScannerService.
 """
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
+
 import psutil
 
+from app.models.port import SystemStats
 from app.services.port_scanner import PortScannerService, port_scanner
-from app.models.port import PortInfo, SystemStats
-from app.config import settings
 
 
 class TestPortScannerService:
@@ -37,7 +36,7 @@ class TestPortScannerService:
             # Second call should use cache
             result2 = port_scanner._get_process_name(1234)
             assert result2 == "test_process.exe"
-            
+
             # Process should only be called once
             mock_process_class.assert_called_once_with(1234)
 
@@ -45,7 +44,7 @@ class TestPortScannerService:
         """Test handling of NoSuchProcess exception."""
         with patch('psutil.Process') as mock_process_class:
             mock_process_class.side_effect = psutil.NoSuchProcess(1234)
-            
+
             result = port_scanner._get_process_name(1234)
             assert result is None
 
@@ -53,7 +52,7 @@ class TestPortScannerService:
         """Test handling of AccessDenied exception."""
         with patch('psutil.Process') as mock_process_class:
             mock_process_class.side_effect = psutil.AccessDenied(1234)
-            
+
             result = port_scanner._get_process_name(1234)
             assert result is None
 
@@ -61,7 +60,7 @@ class TestPortScannerService:
         """Test handling of ZombieProcess exception."""
         with patch('psutil.Process') as mock_process_class:
             mock_process_class.side_effect = psutil.ZombieProcess(1234)
-            
+
             result = port_scanner._get_process_name(1234)
             assert result is None
 
@@ -75,7 +74,7 @@ class TestCriticalProcessDetection:
         assert port_scanner._is_critical_process("svchost.exe", 8080) is True
         assert port_scanner._is_critical_process("csrss.exe", 8080) is True
         assert port_scanner._is_critical_process("lsass.exe", 8080) is True
-        
+
         # Test Linux critical processes
         assert port_scanner._is_critical_process("systemd", 8080) is True
         assert port_scanner._is_critical_process("init", 8080) is True
@@ -111,7 +110,7 @@ class TestAddressFormatting:
         addr = Mock()
         addr.ip = "192.168.1.1"
         addr.port = 8080
-        
+
         result = port_scanner._format_address(addr)
         assert result == "192.168.1.1:8080"
 
@@ -125,7 +124,7 @@ class TestAddressFormatting:
         addr = Mock()
         addr.ip = "127.0.0.1"
         addr.port = 3000
-        
+
         result = port_scanner._format_address(addr)
         assert result == "127.0.0.1:3000"
 
@@ -134,7 +133,7 @@ class TestAddressFormatting:
         addr = Mock()
         addr.ip = "::1"
         addr.port = 8080
-        
+
         result = port_scanner._format_address(addr)
         assert result == "::1:8080"
 
@@ -146,7 +145,7 @@ class TestGetAllConnections:
         """Test that get_all_connections returns a list."""
         with patch('psutil.net_connections') as mock_net_conn:
             mock_net_conn.return_value = []
-            
+
             result = port_scanner.get_all_connections()
             assert isinstance(result, list)
 
@@ -154,10 +153,10 @@ class TestGetAllConnections:
         """Test processing of TCP connections."""
         with patch('psutil.net_connections') as mock_net_conn:
             mock_net_conn.side_effect = lambda kind: [mock_tcp_connection] if kind == 'tcp' else []
-            
+
             with patch.object(port_scanner, '_get_process_name', return_value="test.exe"):
                 result = port_scanner.get_all_connections()
-                
+
                 assert len(result) >= 1
                 tcp_conn = next((c for c in result if c.protocol == "TCP"), None)
                 assert tcp_conn is not None
@@ -168,10 +167,10 @@ class TestGetAllConnections:
         """Test processing of UDP connections."""
         with patch('psutil.net_connections') as mock_net_conn:
             mock_net_conn.side_effect = lambda kind: [mock_udp_connection] if kind == 'udp' else []
-            
+
             with patch.object(port_scanner, '_get_process_name', return_value="dns.exe"):
                 result = port_scanner.get_all_connections()
-                
+
                 udp_conn = next((c for c in result if c.protocol == "UDP"), None)
                 assert udp_conn is not None
                 assert udp_conn.port == 53
@@ -181,7 +180,7 @@ class TestGetAllConnections:
         """Test handling of AccessDenied when scanning."""
         with patch('psutil.net_connections') as mock_net_conn:
             mock_net_conn.side_effect = psutil.AccessDenied(0)
-            
+
             # Should not raise, just return empty list
             result = port_scanner.get_all_connections()
             assert result == []
@@ -202,10 +201,10 @@ class TestGetAllConnections:
 
         with patch('psutil.net_connections') as mock_net_conn:
             mock_net_conn.side_effect = lambda kind: [conn1, conn2] if kind == 'tcp' else []
-            
+
             with patch.object(port_scanner, '_get_process_name', return_value="test.exe"):
                 result = port_scanner.get_all_connections()
-                
+
                 # Should only have one entry despite two identical connections
                 tcp_entries = [c for c in result if c.port == 8080]
                 assert len(tcp_entries) == 1
@@ -213,10 +212,10 @@ class TestGetAllConnections:
     def test_get_all_connections_clears_cache(self, port_scanner):
         """Test that process cache is cleared after getting connections."""
         port_scanner._process_cache = {1234: "cached_process.exe"}
-        
+
         with patch('psutil.net_connections', return_value=[]):
             port_scanner.get_all_connections()
-            
+
             # Cache should be cleared
             assert port_scanner._process_cache == {}
 
@@ -228,10 +227,10 @@ class TestGetAllConnections:
 
         with patch('psutil.net_connections') as mock_net_conn:
             mock_net_conn.side_effect = lambda kind: [conn1, conn2, conn3] if kind == 'tcp' else []
-            
+
             with patch.object(port_scanner, '_get_process_name', return_value="test.exe"):
                 result = port_scanner.get_all_connections()
-                
+
                 ports = [c.port for c in result]
                 assert ports == sorted(ports)
 
@@ -242,7 +241,7 @@ class TestGetSystemStats:
     def test_get_system_stats_with_connections(self, port_scanner, sample_port_info_list):
         """Test statistics calculation with sample connections."""
         result = port_scanner.get_system_stats(sample_port_info_list)
-        
+
         assert isinstance(result, SystemStats)
         assert result.total_tcp_ports == 4  # 80, 443, 22, 8080
         assert result.total_udp_ports == 1  # 53
@@ -253,7 +252,7 @@ class TestGetSystemStats:
     def test_get_system_stats_empty_connections(self, port_scanner):
         """Test statistics with empty connections list."""
         result = port_scanner.get_system_stats([])
-        
+
         assert result.total_tcp_ports == 0
         assert result.total_udp_ports == 0
         assert result.listening_ports == 0
@@ -273,21 +272,21 @@ class TestFilterConnections:
     def test_filter_by_port(self, port_scanner, sample_port_info_list):
         """Test filtering by specific port."""
         result = port_scanner.filter_connections(sample_port_info_list, port_filter=80)
-        
+
         assert len(result) == 1
         assert result[0].port == 80
 
     def test_filter_by_protocol_tcp(self, port_scanner, sample_port_info_list):
         """Test filtering by TCP protocol."""
         result = port_scanner.filter_connections(sample_port_info_list, protocol_filter="TCP")
-        
+
         assert len(result) == 4
         assert all(c.protocol == "TCP" for c in result)
 
     def test_filter_by_protocol_udp(self, port_scanner, sample_port_info_list):
         """Test filtering by UDP protocol."""
         result = port_scanner.filter_connections(sample_port_info_list, protocol_filter="UDP")
-        
+
         assert len(result) == 1
         assert result[0].protocol == "UDP"
 
@@ -295,39 +294,39 @@ class TestFilterConnections:
         """Test that protocol filtering is case-insensitive."""
         result_lower = port_scanner.filter_connections(sample_port_info_list, protocol_filter="tcp")
         result_upper = port_scanner.filter_connections(sample_port_info_list, protocol_filter="TCP")
-        
+
         assert len(result_lower) == len(result_upper)
 
     def test_filter_by_process_name(self, port_scanner, sample_port_info_list):
         """Test filtering by process name (partial match)."""
         result = port_scanner.filter_connections(sample_port_info_list, process_filter="nginx")
-        
+
         assert len(result) == 2
         assert all("nginx" in c.process_name for c in result)
 
     def test_filter_by_process_name_partial(self, port_scanner, sample_port_info_list):
         """Test filtering by partial process name."""
         result = port_scanner.filter_connections(sample_port_info_list, process_filter="ngi")
-        
+
         assert len(result) == 2
 
     def test_filter_by_process_name_case_insensitive(self, port_scanner, sample_port_info_list):
         """Test that process filtering is case-insensitive."""
         result = port_scanner.filter_connections(sample_port_info_list, process_filter="NGINX")
-        
+
         assert len(result) == 2
 
     def test_filter_by_state(self, port_scanner, sample_port_info_list):
         """Test filtering by connection state."""
         result = port_scanner.filter_connections(sample_port_info_list, state_filter="LISTEN")
-        
+
         assert len(result) == 3
         assert all(c.state == "LISTEN" for c in result)
 
     def test_filter_by_state_case_insensitive(self, port_scanner, sample_port_info_list):
         """Test that state filtering is case-insensitive."""
         result = port_scanner.filter_connections(sample_port_info_list, state_filter="listen")
-        
+
         assert len(result) == 3
 
     def test_multiple_filters(self, port_scanner, sample_port_info_list):
@@ -337,20 +336,20 @@ class TestFilterConnections:
             protocol_filter="TCP",
             state_filter="LISTEN"
         )
-        
+
         assert len(result) == 3
         assert all(c.protocol == "TCP" and c.state == "LISTEN" for c in result)
 
     def test_filter_no_match(self, port_scanner, sample_port_info_list):
         """Test filtering with no matching results."""
         result = port_scanner.filter_connections(sample_port_info_list, port_filter=99999)
-        
+
         assert len(result) == 0
 
     def test_filter_empty_list(self, port_scanner):
         """Test filtering an empty list."""
         result = port_scanner.filter_connections([], port_filter=80)
-        
+
         assert result == []
 
 

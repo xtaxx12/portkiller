@@ -1,10 +1,18 @@
 """
 Unit tests for Pydantic data models.
 """
+from datetime import datetime
+
 import pytest
 from pydantic import ValidationError
-from datetime import datetime
-from app.models.port import PortInfo, ProcessKillRequest, ProcessKillResponse, SystemStats, ActionLog
+
+from app.models.port import (
+    ActionLog,
+    PortInfo,
+    ProcessKillRequest,
+    ProcessKillResponse,
+    SystemStats,
+)
 
 
 class TestPortInfo:

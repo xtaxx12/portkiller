@@ -2,13 +2,11 @@
 End-to-End Integration Tests for PortKiller.
 These tests verify the complete flow from API to services.
 """
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, Mock
-import psutil
 
 from main import app
-from app.models.port import PortInfo
 
 
 @pytest.fixture
@@ -32,7 +30,7 @@ class TestE2EPortsFlow:
         response = client.get("/api/stats")
         assert response.status_code == 200
         stats = response.json()
-        
+
         # Verify stats are reasonable (ports can change dynamically)
         assert stats["total_tcp_ports"] >= 0
         assert stats["total_udp_ports"] >= 0
@@ -46,7 +44,7 @@ class TestE2EPortsFlow:
         response = client.get("/api/ports?protocol=TCP&state=LISTEN")
         assert response.status_code == 200
         filtered = response.json()
-        
+
         # Verify all results match criteria
         for port in filtered:
             assert port["protocol"] == "TCP"
@@ -57,7 +55,7 @@ class TestE2EPortsFlow:
         # First get all ports to find a process name
         response = client.get("/api/ports")
         all_ports = response.json()
-        
+
         if all_ports:
             # Find a port with a process name
             port_with_process = next(
@@ -65,7 +63,7 @@ class TestE2EPortsFlow:
             )
             if port_with_process:
                 process_name = port_with_process["process_name"][:4]  # Partial match
-                
+
                 # Search by that process
                 response = client.get(f"/api/ports?process={process_name}")
                 assert response.status_code == 200
@@ -79,11 +77,11 @@ class TestE2EProcessFlow:
         # Get ports to find a valid PID
         response = client.get("/api/ports")
         ports = response.json()
-        
+
         valid_port = next((p for p in ports if p.get("pid")), None)
         if valid_port:
             pid = valid_port["pid"]
-            
+
             # Get process details
             response = client.get(f"/api/process/{pid}")
             # Should be 200 or 403 (access denied) - both are valid
@@ -94,7 +92,7 @@ class TestE2EProcessFlow:
         # Try to kill a known critical process (PID 4 is System on Windows)
         response = client.post("/api/kill/4?force=false")
         assert response.status_code == 200
-        
+
         data = response.json()
         # Should either be blocked (critical) or not found
         if data.get("process_name"):
@@ -105,7 +103,7 @@ class TestE2EProcessFlow:
         # Use a very high PID that likely doesn't exist
         response = client.post("/api/kill/999999?force=false")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["success"] is False
         assert "no longer exists" in data["message"] or "not found" in data["message"].lower()
@@ -118,7 +116,7 @@ class TestE2ELogsFlow:
         """Test that actions are logged."""
         # Perform an action (try to kill non-existent process)
         client.post("/api/kill/999998?force=false&port=9999")
-        
+
         # Get logs
         response = client.get("/api/logs?limit=10")
         assert response.status_code == 200
@@ -129,7 +127,7 @@ class TestE2ELogsFlow:
         """Test that logs have expected structure."""
         response = client.get("/api/logs")
         logs = response.json()
-        
+
         if logs:
             log = logs[0]
             assert "timestamp" in log
@@ -152,11 +150,11 @@ class TestE2EHealthCheck:
         # Swagger UI
         response = client.get("/docs")
         assert response.status_code == 200
-        
+
         # ReDoc
         response = client.get("/redoc")
         assert response.status_code == 200
-        
+
         # OpenAPI schema
         response = client.get("/openapi.json")
         assert response.status_code == 200
@@ -177,7 +175,7 @@ class TestE2EErrorHandling:
         """Test handling of invalid log limit."""
         response = client.get("/api/logs?limit=0")
         assert response.status_code == 422
-        
+
         response = client.get("/api/logs?limit=10000")
         assert response.status_code == 422
 
@@ -193,13 +191,13 @@ class TestE2EConcurrency:
     def test_concurrent_port_requests(self, client):
         """Test multiple concurrent requests."""
         import concurrent.futures
-        
+
         def make_request():
             return client.get("/api/ports")
-        
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(make_request) for _ in range(10)]
             results = [f.result() for f in futures]
-        
+
         # All requests should succeed
         assert all(r.status_code == 200 for r in results)

@@ -1,15 +1,12 @@
 """
 Unit tests for the ProcessManagerService.
 """
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-import psutil
 import os
-from datetime import datetime
+from unittest.mock import Mock, patch
+
+import psutil
 
 from app.services.process_manager import ProcessManagerService, process_manager
-from app.models.port import ProcessKillResponse, ActionLog
-from app.config import settings
 
 
 class TestProcessManagerService:
@@ -50,7 +47,7 @@ class TestCriticalProcessDetection:
         """Test handling when process no longer exists."""
         process = Mock()
         process.name.side_effect = psutil.NoSuchProcess(1234)
-        
+
         result = process_manager._is_critical_process(process)
         assert result is False
 
@@ -58,7 +55,7 @@ class TestCriticalProcessDetection:
         """Test handling when access to process is denied."""
         process = Mock()
         process.name.side_effect = psutil.AccessDenied(1234)
-        
+
         result = process_manager._is_critical_process(process)
         assert result is False
 
@@ -70,7 +67,7 @@ class TestActionLogging:
         """Test that logging an action adds it to the list."""
         with patch.object(process_manager, '_get_current_user', return_value="testuser"):
             process_manager._log_action("TEST", 1234, "test.exe", 8080, "SUCCESS")
-            
+
             assert len(process_manager.action_logs) == 1
             log = process_manager.action_logs[0]
             assert log.action == "TEST"
@@ -86,14 +83,14 @@ class TestActionLogging:
             # Add 1005 entries
             for i in range(1005):
                 process_manager._log_action("TEST", i, f"process_{i}", None, "SUCCESS")
-            
+
             assert len(process_manager.action_logs) == 1000
 
     def test_log_action_logs_to_file(self, process_manager):
         """Test that actions are logged to file."""
         with patch.object(process_manager, '_get_current_user', return_value="testuser"):
             process_manager._log_action("KILL", 1234, "test.exe", 8080, "SUCCESS")
-            
+
             process_manager.logger.info.assert_called()
 
 
@@ -106,9 +103,9 @@ class TestGetProcessInfo:
             mock_process = Mock()
             mock_process.name.return_value = "test.exe"
             mock_process_class.return_value = mock_process
-            
+
             exists, name, error = process_manager.get_process_info(1234)
-            
+
             assert exists is True
             assert name == "test.exe"
             assert error is None
@@ -117,9 +114,9 @@ class TestGetProcessInfo:
         """Test getting info for a non-existent process."""
         with patch('psutil.Process') as mock_process_class:
             mock_process_class.side_effect = psutil.NoSuchProcess(9999)
-            
+
             exists, name, error = process_manager.get_process_info(9999)
-            
+
             assert exists is False
             assert name is None
             assert "does not exist" in error
@@ -128,9 +125,9 @@ class TestGetProcessInfo:
         """Test getting info when access is denied."""
         with patch('psutil.Process') as mock_process_class:
             mock_process_class.side_effect = psutil.AccessDenied(1234)
-            
+
             exists, name, error = process_manager.get_process_info(1234)
-            
+
             assert exists is True
             assert name is None
             assert "Access denied" in error
@@ -146,11 +143,11 @@ class TestKillProcess:
             mock_process.name.return_value = "test.exe"
             mock_process.wait.return_value = None
             mock_process_class.return_value = mock_process
-            
+
             with patch.object(process_manager, '_is_critical_process', return_value=False):
                 with patch('os.getpid', return_value=9999):
                     result = process_manager.kill_process(1234, force=False)
-                    
+
                     assert result.success is True
                     assert "Successfully terminated" in result.message
                     assert result.pid == 1234
@@ -164,11 +161,11 @@ class TestKillProcess:
             mock_process.name.return_value = "test.exe"
             mock_process.wait.return_value = None
             mock_process_class.return_value = mock_process
-            
+
             with patch.object(process_manager, '_is_critical_process', return_value=False):
                 with patch('os.getpid', return_value=9999):
                     result = process_manager.kill_process(1234, force=True)
-                    
+
                     assert result.success is True
                     mock_process.kill.assert_called()
 
@@ -178,10 +175,10 @@ class TestKillProcess:
             mock_process = Mock()
             mock_process.name.return_value = "svchost.exe"
             mock_process_class.return_value = mock_process
-            
+
             with patch.object(process_manager, '_is_critical_process', return_value=True):
                 result = process_manager.kill_process(100, force=False)
-                
+
                 assert result.success is False
                 assert "critical system process" in result.message.lower()
                 mock_process.terminate.assert_not_called()
@@ -190,15 +187,15 @@ class TestKillProcess:
     def test_kill_process_blocks_self_termination(self, process_manager):
         """Test that the app cannot terminate itself."""
         current_pid = os.getpid()
-        
+
         with patch('psutil.Process') as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "python.exe"
             mock_process_class.return_value = mock_process
-            
+
             with patch.object(process_manager, '_is_critical_process', return_value=False):
                 result = process_manager.kill_process(current_pid, force=False)
-                
+
                 assert result.success is False
                 assert "PortKiller process itself" in result.message
                 mock_process.terminate.assert_not_called()
@@ -207,9 +204,9 @@ class TestKillProcess:
         """Test handling when process doesn't exist."""
         with patch('psutil.Process') as mock_process_class:
             mock_process_class.side_effect = psutil.NoSuchProcess(9999)
-            
+
             result = process_manager.kill_process(9999, force=False)
-            
+
             assert result.success is False
             assert "no longer exists" in result.message
 
@@ -217,9 +214,9 @@ class TestKillProcess:
         """Test handling when access to kill is denied."""
         with patch('psutil.Process') as mock_process_class:
             mock_process_class.side_effect = psutil.AccessDenied(1234)
-            
+
             result = process_manager.kill_process(1234, force=False)
-            
+
             assert result.success is False
             assert "Access denied" in result.message
             assert "administrator" in result.message.lower()
@@ -234,11 +231,11 @@ class TestKillProcess:
                 None  # Second wait succeeds
             ]
             mock_process_class.return_value = mock_process
-            
+
             with patch.object(process_manager, '_is_critical_process', return_value=False):
                 with patch('os.getpid', return_value=9999):
                     result = process_manager.kill_process(1234, force=False)
-                    
+
                     assert result.success is True
                     # Should have called terminate first, then kill
                     mock_process.terminate.assert_called_once()
@@ -251,11 +248,11 @@ class TestKillProcess:
             mock_process.name.return_value = "immortal.exe"
             mock_process.wait.side_effect = psutil.TimeoutExpired(3)
             mock_process_class.return_value = mock_process
-            
+
             with patch.object(process_manager, '_is_critical_process', return_value=False):
                 with patch('os.getpid', return_value=9999):
                     result = process_manager.kill_process(1234, force=False)
-                    
+
                     assert result.success is False
                     assert "did not terminate" in result.message
 
@@ -263,9 +260,9 @@ class TestKillProcess:
         """Test handling of unexpected exceptions."""
         with patch('psutil.Process') as mock_process_class:
             mock_process_class.side_effect = Exception("Unexpected error")
-            
+
             result = process_manager.kill_process(1234, force=False)
-            
+
             assert result.success is False
             assert "Unexpected error" in result.message
 
@@ -276,11 +273,11 @@ class TestKillProcess:
             mock_process.name.return_value = "test.exe"
             mock_process.wait.return_value = None
             mock_process_class.return_value = mock_process
-            
+
             with patch.object(process_manager, '_is_critical_process', return_value=False):
                 with patch('os.getpid', return_value=9999):
                     process_manager.kill_process(1234, force=False, port=8080)
-                    
+
                     assert len(process_manager.action_logs) >= 1
                     log = process_manager.action_logs[-1]
                     assert log.target_pid == 1234
@@ -295,9 +292,9 @@ class TestGetActionLogs:
         with patch.object(process_manager, '_get_current_user', return_value="testuser"):
             for i in range(5):
                 process_manager._log_action("TEST", i, f"process_{i}", None, "SUCCESS")
-            
+
             logs = process_manager.get_action_logs(limit=5)
-            
+
             # Most recent (i=4) should be first
             assert logs[0].target_pid == 4
             assert logs[-1].target_pid == 0
@@ -307,15 +304,15 @@ class TestGetActionLogs:
         with patch.object(process_manager, '_get_current_user', return_value="testuser"):
             for i in range(10):
                 process_manager._log_action("TEST", i, f"process_{i}", None, "SUCCESS")
-            
+
             logs = process_manager.get_action_logs(limit=3)
-            
+
             assert len(logs) == 3
 
     def test_get_action_logs_empty(self, process_manager):
         """Test getting logs when there are none."""
         logs = process_manager.get_action_logs(limit=10)
-        
+
         assert logs == []
 
 

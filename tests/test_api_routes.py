@@ -1,8 +1,8 @@
 """
 Unit tests for the API routes.
 """
-import pytest
 from unittest.mock import patch
+
 from app.models.port import ProcessKillResponse
 
 

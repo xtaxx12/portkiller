@@ -3,11 +3,12 @@ PortKiller - Main Application Entry Point
 
 A modern port management tool for developers and DevOps engineers.
 """
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from pathlib import Path
+
 import uvicorn
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.routes.ports import router as ports_router
@@ -64,7 +65,7 @@ def main():
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
     """)
-    
+
     uvicorn.run(
         "main:app",
         host=settings.HOST,

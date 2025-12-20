@@ -1,14 +1,15 @@
 """
 Port and Process data models for PortKiller.
 """
-from pydantic import BaseModel, Field
-from typing import Optional, Literal
 from datetime import datetime
+from typing import Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
 class PortInfo(BaseModel):
     """Model representing an open port and its associated process."""
-    
+
     port: int = Field(..., description="Port number", ge=0, le=65535)
     protocol: Literal["TCP", "UDP"] = Field(..., description="Protocol type")
     state: str = Field(..., description="Connection state (LISTEN, ESTABLISHED, etc.)")
@@ -17,7 +18,7 @@ class PortInfo(BaseModel):
     local_address: str = Field(..., description="Local address binding")
     remote_address: Optional[str] = Field(None, description="Remote address if connected")
     is_critical: bool = Field(False, description="Whether this process is critical")
-    
+
     class Config:
         json_schema_extra = {
             "example": {
@@ -35,14 +36,14 @@ class PortInfo(BaseModel):
 
 class ProcessKillRequest(BaseModel):
     """Request to terminate a process."""
-    
+
     pid: int = Field(..., description="Process ID to terminate", gt=0)
     force: bool = Field(False, description="Force terminate (SIGKILL) if normal terminate fails")
 
 
 class ProcessKillResponse(BaseModel):
     """Response after attempting to kill a process."""
-    
+
     success: bool
     message: str
     pid: int
@@ -52,7 +53,7 @@ class ProcessKillResponse(BaseModel):
 
 class SystemStats(BaseModel):
     """System statistics for the dashboard."""
-    
+
     total_tcp_ports: int
     total_udp_ports: int
     listening_ports: int
@@ -62,7 +63,7 @@ class SystemStats(BaseModel):
 
 class ActionLog(BaseModel):
     """Log entry for actions performed."""
-    
+
     timestamp: datetime
     action: str
     target_pid: Optional[int]
