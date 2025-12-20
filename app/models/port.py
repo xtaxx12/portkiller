@@ -1,6 +1,7 @@
 """
 Port and Process data models for PortKiller.
 """
+
 from datetime import datetime
 from typing import Literal, Optional
 
@@ -29,7 +30,7 @@ class PortInfo(BaseModel):
                 "process_name": "python.exe",
                 "local_address": "0.0.0.0:8080",
                 "remote_address": None,
-                "is_critical": False
+                "is_critical": False,
             }
         }
 

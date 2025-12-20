@@ -1,6 +1,7 @@
 """
 API Routes for port management.
 """
+
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
@@ -17,7 +18,7 @@ async def get_ports(
     port: Optional[int] = Query(None, description="Filter by specific port number"),
     protocol: Optional[str] = Query(None, description="Filter by protocol (TCP/UDP)"),
     process: Optional[str] = Query(None, description="Filter by process name (partial match)"),
-    state: Optional[str] = Query(None, description="Filter by connection state")
+    state: Optional[str] = Query(None, description="Filter by connection state"),
 ):
     """
     Get list of all open ports with filtering options.
@@ -37,7 +38,7 @@ async def get_ports(
             port_filter=port,
             protocol_filter=protocol,
             process_filter=process,
-            state_filter=state
+            state_filter=state,
         )
 
     return connections
@@ -83,7 +84,7 @@ async def kill_process(request: ProcessKillRequest):
 async def kill_process_by_id(
     pid: int,
     force: bool = Query(False, description="Force terminate if normal termination fails"),
-    port: Optional[int] = Query(None, description="Port number for logging purposes")
+    port: Optional[int] = Query(None, description="Port number for logging purposes"),
 ):
     """
     Terminate a process by its PID (path parameter version).

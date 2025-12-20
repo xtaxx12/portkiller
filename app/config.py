@@ -1,6 +1,7 @@
 """
 Configuration settings for PortKiller.
 """
+
 import os
 
 
@@ -34,14 +35,12 @@ class Settings:
         "winlogon.exe",
         "explorer.exe",
         "dwm.exe",
-
         # Linux critical processes
         "init",
         "systemd",
         "kthreadd",
         "ksoftirqd",
         "kworker",
-
         # macOS critical processes
         "launchd",
         "kernel_task",
@@ -50,16 +49,16 @@ class Settings:
 
     # Critical ports (system ports that typically shouldn't be killed)
     CRITICAL_PORTS: set[int] = {
-        22,    # SSH
-        53,    # DNS
-        67,    # DHCP
-        68,    # DHCP
-        123,   # NTP
-        135,   # RPC
-        137,   # NetBIOS
-        138,   # NetBIOS
-        139,   # NetBIOS
-        445,   # SMB
+        22,  # SSH
+        53,  # DNS
+        67,  # DHCP
+        68,  # DHCP
+        123,  # NTP
+        135,  # RPC
+        137,  # NetBIOS
+        138,  # NetBIOS
+        139,  # NetBIOS
+        445,  # SMB
     }
 
     # Logging

@@ -1,6 +1,7 @@
 """
 Unit tests for the API routes.
 """
+
 from unittest.mock import patch
 
 from app.models.port import ProcessKillResponse
@@ -27,7 +28,7 @@ class TestPortsEndpoint:
 
     def test_get_ports_with_filters(self, test_client, sample_port_info_list):
         """Test filtering ports."""
-        with patch('app.services.port_scanner.port_scanner.get_all_connections') as mock:
+        with patch("app.services.port_scanner.port_scanner.get_all_connections") as mock:
             mock.return_value = sample_port_info_list
             response = test_client.get("/api/ports?protocol=TCP")
             assert response.status_code == 200
@@ -53,7 +54,7 @@ class TestKillEndpoint:
         mock_response = ProcessKillResponse(
             success=True, message="OK", pid=1234, process_name="test.exe"
         )
-        with patch('app.services.process_manager.process_manager.kill_process') as mock:
+        with patch("app.services.process_manager.process_manager.kill_process") as mock:
             mock.return_value = mock_response
             response = test_client.post("/api/kill", json={"pid": 1234, "force": False})
             assert response.status_code == 200

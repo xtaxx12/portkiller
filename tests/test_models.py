@@ -1,6 +1,7 @@
 """
 Unit tests for Pydantic data models.
 """
+
 from datetime import datetime
 
 import pytest
@@ -21,9 +22,13 @@ class TestPortInfo:
     def test_valid_port_info(self):
         """Test creating a valid PortInfo."""
         port = PortInfo(
-            port=8080, protocol="TCP", state="LISTEN",
-            pid=1234, process_name="python.exe",
-            local_address="0.0.0.0:8080", is_critical=False
+            port=8080,
+            protocol="TCP",
+            state="LISTEN",
+            pid=1234,
+            process_name="python.exe",
+            local_address="0.0.0.0:8080",
+            is_critical=False,
         )
         assert port.port == 8080
         assert port.protocol == "TCP"
@@ -81,8 +86,11 @@ class TestSystemStats:
     def test_valid_stats(self):
         """Test creating valid system stats."""
         stats = SystemStats(
-            total_tcp_ports=10, total_udp_ports=5,
-            listening_ports=8, established_connections=7, unique_processes=12
+            total_tcp_ports=10,
+            total_udp_ports=5,
+            listening_ports=8,
+            established_connections=7,
+            unique_processes=12,
         )
         assert stats.total_tcp_ports == 10
         assert stats.unique_processes == 12
@@ -94,9 +102,13 @@ class TestActionLog:
     def test_valid_log(self):
         """Test creating a valid action log."""
         log = ActionLog(
-            timestamp=datetime.now(), action="KILL",
-            target_pid=1234, target_process="test.exe",
-            target_port=8080, result="SUCCESS", user="admin"
+            timestamp=datetime.now(),
+            action="KILL",
+            target_pid=1234,
+            target_process="test.exe",
+            target_port=8080,
+            result="SUCCESS",
+            user="admin",
         )
         assert log.action == "KILL"
         assert log.target_pid == 1234

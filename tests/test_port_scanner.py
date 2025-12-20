@@ -1,6 +1,7 @@
 """
 Unit tests for the PortScannerService.
 """
+
 from unittest.mock import Mock, patch
 
 import psutil
@@ -23,7 +24,7 @@ class TestPortScannerService:
 
     def test_get_process_name_caches_result(self, port_scanner):
         """Test that process names are cached."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "test_process.exe"
             mock_process_class.return_value = mock_process
@@ -42,7 +43,7 @@ class TestPortScannerService:
 
     def test_get_process_name_handles_no_such_process(self, port_scanner):
         """Test handling of NoSuchProcess exception."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process_class.side_effect = psutil.NoSuchProcess(1234)
 
             result = port_scanner._get_process_name(1234)
@@ -50,7 +51,7 @@ class TestPortScannerService:
 
     def test_get_process_name_handles_access_denied(self, port_scanner):
         """Test handling of AccessDenied exception."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process_class.side_effect = psutil.AccessDenied(1234)
 
             result = port_scanner._get_process_name(1234)
@@ -58,7 +59,7 @@ class TestPortScannerService:
 
     def test_get_process_name_handles_zombie_process(self, port_scanner):
         """Test handling of ZombieProcess exception."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process_class.side_effect = psutil.ZombieProcess(1234)
 
             result = port_scanner._get_process_name(1234)
@@ -81,8 +82,8 @@ class TestCriticalProcessDetection:
 
     def test_is_critical_process_detects_critical_by_port(self, port_scanner):
         """Test detection of critical connections by port."""
-        assert port_scanner._is_critical_process("nginx", 22) is True   # SSH
-        assert port_scanner._is_critical_process("nginx", 53) is True   # DNS
+        assert port_scanner._is_critical_process("nginx", 22) is True  # SSH
+        assert port_scanner._is_critical_process("nginx", 53) is True  # DNS
         assert port_scanner._is_critical_process("nginx", 445) is True  # SMB
 
     def test_is_critical_process_returns_false_for_normal(self, port_scanner):
@@ -143,7 +144,7 @@ class TestGetAllConnections:
 
     def test_get_all_connections_returns_list(self, port_scanner):
         """Test that get_all_connections returns a list."""
-        with patch('psutil.net_connections') as mock_net_conn:
+        with patch("psutil.net_connections") as mock_net_conn:
             mock_net_conn.return_value = []
 
             result = port_scanner.get_all_connections()
@@ -151,10 +152,10 @@ class TestGetAllConnections:
 
     def test_get_all_connections_processes_tcp(self, port_scanner, mock_tcp_connection):
         """Test processing of TCP connections."""
-        with patch('psutil.net_connections') as mock_net_conn:
-            mock_net_conn.side_effect = lambda kind: [mock_tcp_connection] if kind == 'tcp' else []
+        with patch("psutil.net_connections") as mock_net_conn:
+            mock_net_conn.side_effect = lambda kind: [mock_tcp_connection] if kind == "tcp" else []
 
-            with patch.object(port_scanner, '_get_process_name', return_value="test.exe"):
+            with patch.object(port_scanner, "_get_process_name", return_value="test.exe"):
                 result = port_scanner.get_all_connections()
 
                 assert len(result) >= 1
@@ -165,10 +166,10 @@ class TestGetAllConnections:
 
     def test_get_all_connections_processes_udp(self, port_scanner, mock_udp_connection):
         """Test processing of UDP connections."""
-        with patch('psutil.net_connections') as mock_net_conn:
-            mock_net_conn.side_effect = lambda kind: [mock_udp_connection] if kind == 'udp' else []
+        with patch("psutil.net_connections") as mock_net_conn:
+            mock_net_conn.side_effect = lambda kind: [mock_udp_connection] if kind == "udp" else []
 
-            with patch.object(port_scanner, '_get_process_name', return_value="dns.exe"):
+            with patch.object(port_scanner, "_get_process_name", return_value="dns.exe"):
                 result = port_scanner.get_all_connections()
 
                 udp_conn = next((c for c in result if c.protocol == "UDP"), None)
@@ -178,7 +179,7 @@ class TestGetAllConnections:
 
     def test_get_all_connections_handles_access_denied(self, port_scanner):
         """Test handling of AccessDenied when scanning."""
-        with patch('psutil.net_connections') as mock_net_conn:
+        with patch("psutil.net_connections") as mock_net_conn:
             mock_net_conn.side_effect = psutil.AccessDenied(0)
 
             # Should not raise, just return empty list
@@ -199,10 +200,10 @@ class TestGetAllConnections:
         conn2.status = "LISTEN"
         conn2.pid = 1234
 
-        with patch('psutil.net_connections') as mock_net_conn:
-            mock_net_conn.side_effect = lambda kind: [conn1, conn2] if kind == 'tcp' else []
+        with patch("psutil.net_connections") as mock_net_conn:
+            mock_net_conn.side_effect = lambda kind: [conn1, conn2] if kind == "tcp" else []
 
-            with patch.object(port_scanner, '_get_process_name', return_value="test.exe"):
+            with patch.object(port_scanner, "_get_process_name", return_value="test.exe"):
                 result = port_scanner.get_all_connections()
 
                 # Should only have one entry despite two identical connections
@@ -213,7 +214,7 @@ class TestGetAllConnections:
         """Test that process cache is cleared after getting connections."""
         port_scanner._process_cache = {1234: "cached_process.exe"}
 
-        with patch('psutil.net_connections', return_value=[]):
+        with patch("psutil.net_connections", return_value=[]):
             port_scanner.get_all_connections()
 
             # Cache should be cleared
@@ -225,10 +226,10 @@ class TestGetAllConnections:
         conn2 = Mock(laddr=Mock(ip="0.0.0.0", port=80), raddr=None, status="LISTEN", pid=2)
         conn3 = Mock(laddr=Mock(ip="0.0.0.0", port=443), raddr=None, status="LISTEN", pid=3)
 
-        with patch('psutil.net_connections') as mock_net_conn:
-            mock_net_conn.side_effect = lambda kind: [conn1, conn2, conn3] if kind == 'tcp' else []
+        with patch("psutil.net_connections") as mock_net_conn:
+            mock_net_conn.side_effect = lambda kind: [conn1, conn2, conn3] if kind == "tcp" else []
 
-            with patch.object(port_scanner, '_get_process_name', return_value="test.exe"):
+            with patch.object(port_scanner, "_get_process_name", return_value="test.exe"):
                 result = port_scanner.get_all_connections()
 
                 ports = [c.port for c in result]
@@ -261,7 +262,7 @@ class TestGetSystemStats:
 
     def test_get_system_stats_fetches_if_none(self, port_scanner):
         """Test that stats fetches connections if none provided."""
-        with patch.object(port_scanner, 'get_all_connections', return_value=[]) as mock_get:
+        with patch.object(port_scanner, "get_all_connections", return_value=[]) as mock_get:
             port_scanner.get_system_stats(None)
             mock_get.assert_called_once()
 
@@ -332,9 +333,7 @@ class TestFilterConnections:
     def test_multiple_filters(self, port_scanner, sample_port_info_list):
         """Test combining multiple filters."""
         result = port_scanner.filter_connections(
-            sample_port_info_list,
-            protocol_filter="TCP",
-            state_filter="LISTEN"
+            sample_port_info_list, protocol_filter="TCP", state_filter="LISTEN"
         )
 
         assert len(result) == 3

@@ -58,9 +58,7 @@ class TestE2EPortsFlow:
 
         if all_ports:
             # Find a port with a process name
-            port_with_process = next(
-                (p for p in all_ports if p.get("process_name")), None
-            )
+            port_with_process = next((p for p in all_ports if p.get("process_name")), None)
             if port_with_process:
                 process_name = port_with_process["process_name"][:4]  # Partial match
 

@@ -1,6 +1,7 @@
 """
 Process Manager Service - Handles process termination with safety checks.
 """
+
 import logging
 import os
 from datetime import datetime
@@ -31,9 +32,7 @@ class ProcessManagerService:
 
         if not self.logger.handlers:
             handler = logging.FileHandler(settings.LOG_FILE)
-            handler.setFormatter(
-                logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-            )
+            handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
             self.logger.addHandler(handler)
 
     def _is_critical_process(self, process: psutil.Process) -> bool:
@@ -57,7 +56,7 @@ class ProcessManagerService:
         pid: Optional[int],
         process_name: Optional[str],
         port: Optional[int],
-        result: str
+        result: str,
     ):
         """Log an action to file and memory."""
         log_entry = ActionLog(
@@ -67,7 +66,7 @@ class ProcessManagerService:
             target_process=process_name,
             target_port=port,
             result=result,
-            user=self._get_current_user()
+            user=self._get_current_user(),
         )
 
         self.action_logs.append(log_entry)
@@ -98,10 +97,7 @@ class ProcessManagerService:
             return True, None, f"Access denied to process {pid}"
 
     def kill_process(
-        self,
-        pid: int,
-        force: bool = False,
-        port: Optional[int] = None
+        self, pid: int, force: bool = False, port: Optional[int] = None
     ) -> ProcessKillResponse:
         """
         Attempt to terminate a process by PID.
@@ -123,10 +119,7 @@ class ProcessManagerService:
                 error_msg = f"Cannot terminate critical system process: {process_name} (PID: {pid})"
                 self._log_action("KILL_BLOCKED", pid, process_name, port, "CRITICAL_PROCESS")
                 return ProcessKillResponse(
-                    success=False,
-                    message=error_msg,
-                    pid=pid,
-                    process_name=process_name
+                    success=False, message=error_msg, pid=pid, process_name=process_name
                 )
 
             # Safety check: prevent killing self
@@ -134,10 +127,7 @@ class ProcessManagerService:
                 error_msg = "Cannot terminate the PortKiller process itself"
                 self._log_action("KILL_BLOCKED", pid, process_name, port, "SELF_TERMINATION")
                 return ProcessKillResponse(
-                    success=False,
-                    message=error_msg,
-                    pid=pid,
-                    process_name=process_name
+                    success=False, message=error_msg, pid=pid, process_name=process_name
                 )
 
             # Attempt to terminate
@@ -162,50 +152,29 @@ class ProcessManagerService:
                         error_msg = f"Process {process_name} (PID: {pid}) did not terminate"
                         self._log_action(action, pid, process_name, port, "TIMEOUT")
                         return ProcessKillResponse(
-                            success=False,
-                            message=error_msg,
-                            pid=pid,
-                            process_name=process_name
+                            success=False, message=error_msg, pid=pid, process_name=process_name
                         )
 
             success_msg = f"Successfully terminated {process_name} (PID: {pid})"
             self._log_action(action, pid, process_name, port, "SUCCESS")
             return ProcessKillResponse(
-                success=True,
-                message=success_msg,
-                pid=pid,
-                process_name=process_name
+                success=True, message=success_msg, pid=pid, process_name=process_name
             )
 
         except psutil.NoSuchProcess:
             error_msg = f"Process with PID {pid} no longer exists (may have already terminated)"
             self._log_action("KILL_ATTEMPTED", pid, None, port, "NOT_FOUND")
-            return ProcessKillResponse(
-                success=False,
-                message=error_msg,
-                pid=pid,
-                process_name=None
-            )
+            return ProcessKillResponse(success=False, message=error_msg, pid=pid, process_name=None)
 
         except psutil.AccessDenied:
             error_msg = f"Access denied. Insufficient permissions to terminate process {pid}. Try running as administrator."
             self._log_action("KILL_ATTEMPTED", pid, None, port, "ACCESS_DENIED")
-            return ProcessKillResponse(
-                success=False,
-                message=error_msg,
-                pid=pid,
-                process_name=None
-            )
+            return ProcessKillResponse(success=False, message=error_msg, pid=pid, process_name=None)
 
         except Exception as e:
             error_msg = f"Unexpected error terminating process {pid}: {str(e)}"
             self._log_action("KILL_ATTEMPTED", pid, None, port, f"ERROR: {str(e)}")
-            return ProcessKillResponse(
-                success=False,
-                message=error_msg,
-                pid=pid,
-                process_name=None
-            )
+            return ProcessKillResponse(success=False, message=error_msg, pid=pid, process_name=None)
 
     def get_action_logs(self, limit: int = 100) -> list[ActionLog]:
         """Get recent action logs."""

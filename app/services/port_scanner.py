@@ -1,6 +1,7 @@
 """
 Port Scanner Service - Interfaces with the operating system to detect open ports.
 """
+
 from typing import Optional
 
 import psutil
@@ -51,7 +52,9 @@ class PortScannerService:
 
     def _is_critical_process(self, process_name: Optional[str], port: int) -> bool:
         """Check if a process or port is critical."""
-        if process_name and process_name.lower() in {p.lower() for p in settings.CRITICAL_PROCESSES}:
+        if process_name and process_name.lower() in {
+            p.lower() for p in settings.CRITICAL_PROCESSES
+        }:
             return True
         if port in settings.CRITICAL_PORTS:
             return True
@@ -75,7 +78,7 @@ class PortScannerService:
 
         # Get TCP connections
         try:
-            tcp_connections = psutil.net_connections(kind='tcp')
+            tcp_connections = psutil.net_connections(kind="tcp")
             for conn in tcp_connections:
                 if conn.laddr:
                     port = conn.laddr.port
@@ -85,22 +88,26 @@ class PortScannerService:
                         seen_ports.add(key)
                         process_name = self._get_process_name(conn.pid)
 
-                        connections.append(PortInfo(
-                            port=port,
-                            protocol="TCP",
-                            state=self.STATE_MAP.get(conn.status, conn.status),
-                            pid=conn.pid,
-                            process_name=process_name,
-                            local_address=self._format_address(conn.laddr),
-                            remote_address=self._format_address(conn.raddr) if conn.raddr else None,
-                            is_critical=self._is_critical_process(process_name, port)
-                        ))
+                        connections.append(
+                            PortInfo(
+                                port=port,
+                                protocol="TCP",
+                                state=self.STATE_MAP.get(conn.status, conn.status),
+                                pid=conn.pid,
+                                process_name=process_name,
+                                local_address=self._format_address(conn.laddr),
+                                remote_address=(
+                                    self._format_address(conn.raddr) if conn.raddr else None
+                                ),
+                                is_critical=self._is_critical_process(process_name, port),
+                            )
+                        )
         except (psutil.AccessDenied, PermissionError) as e:
             print(f"Access denied when scanning TCP ports: {e}")
 
         # Get UDP connections
         try:
-            udp_connections = psutil.net_connections(kind='udp')
+            udp_connections = psutil.net_connections(kind="udp")
             for conn in udp_connections:
                 if conn.laddr:
                     port = conn.laddr.port
@@ -110,16 +117,20 @@ class PortScannerService:
                         seen_ports.add(key)
                         process_name = self._get_process_name(conn.pid)
 
-                        connections.append(PortInfo(
-                            port=port,
-                            protocol="UDP",
-                            state="NONE",  # UDP doesn't have connection states
-                            pid=conn.pid,
-                            process_name=process_name,
-                            local_address=self._format_address(conn.laddr),
-                            remote_address=self._format_address(conn.raddr) if conn.raddr else None,
-                            is_critical=self._is_critical_process(process_name, port)
-                        ))
+                        connections.append(
+                            PortInfo(
+                                port=port,
+                                protocol="UDP",
+                                state="NONE",  # UDP doesn't have connection states
+                                pid=conn.pid,
+                                process_name=process_name,
+                                local_address=self._format_address(conn.laddr),
+                                remote_address=(
+                                    self._format_address(conn.raddr) if conn.raddr else None
+                                ),
+                                is_critical=self._is_critical_process(process_name, port),
+                            )
+                        )
         except (psutil.AccessDenied, PermissionError) as e:
             print(f"Access denied when scanning UDP ports: {e}")
 
@@ -155,7 +166,7 @@ class PortScannerService:
             total_udp_ports=len(udp_ports),
             listening_ports=len(listening),
             established_connections=len(established),
-            unique_processes=len(unique_pids)
+            unique_processes=len(unique_pids),
         )
 
     def filter_connections(
@@ -164,7 +175,7 @@ class PortScannerService:
         port_filter: Optional[int] = None,
         protocol_filter: Optional[str] = None,
         process_filter: Optional[str] = None,
-        state_filter: Optional[str] = None
+        state_filter: Optional[str] = None,
     ) -> list[PortInfo]:
         """
         Filter connections based on criteria.
@@ -189,7 +200,8 @@ class PortScannerService:
 
         if process_filter:
             result = [
-                c for c in result
+                c
+                for c in result
                 if c.process_name and process_filter.lower() in c.process_name.lower()
             ]
 

@@ -1,6 +1,7 @@
 """
 Pytest Configuration and Fixtures for PortKiller tests.
 """
+
 # Import the app and services
 import sys
 from pathlib import Path
@@ -34,7 +35,7 @@ def port_scanner():
 @pytest.fixture
 def process_manager():
     """Create a fresh ProcessManagerService instance for testing."""
-    with patch.object(ProcessManagerService, '_setup_logging'):
+    with patch.object(ProcessManagerService, "_setup_logging"):
         manager = ProcessManagerService()
         manager.logger = Mock()
         manager.action_logs = []
@@ -52,7 +53,7 @@ def sample_port_info():
         process_name="python.exe",
         local_address="0.0.0.0:8080",
         remote_address=None,
-        is_critical=False
+        is_critical=False,
     )
 
 
@@ -68,7 +69,7 @@ def sample_port_info_list():
             process_name="nginx",
             local_address="0.0.0.0:80",
             remote_address=None,
-            is_critical=False
+            is_critical=False,
         ),
         PortInfo(
             port=443,
@@ -78,7 +79,7 @@ def sample_port_info_list():
             process_name="nginx",
             local_address="0.0.0.0:443",
             remote_address="192.168.1.100:54321",
-            is_critical=False
+            is_critical=False,
         ),
         PortInfo(
             port=22,
@@ -88,7 +89,7 @@ def sample_port_info_list():
             process_name="sshd",
             local_address="0.0.0.0:22",
             remote_address=None,
-            is_critical=True
+            is_critical=True,
         ),
         PortInfo(
             port=53,
@@ -98,7 +99,7 @@ def sample_port_info_list():
             process_name="dnsmasq",
             local_address="0.0.0.0:53",
             remote_address=None,
-            is_critical=True
+            is_critical=True,
         ),
         PortInfo(
             port=8080,
@@ -108,7 +109,7 @@ def sample_port_info_list():
             process_name="python.exe",
             local_address="127.0.0.1:8080",
             remote_address=None,
-            is_critical=False
+            is_critical=False,
         ),
     ]
 

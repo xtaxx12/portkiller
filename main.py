@@ -3,6 +3,7 @@ PortKiller - Main Application Entry Point
 
 A modern port management tool for developers and DevOps engineers.
 """
+
 from pathlib import Path
 
 import uvicorn
@@ -19,7 +20,7 @@ app = FastAPI(
     version=settings.APP_VERSION,
     description=settings.APP_DESCRIPTION,
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 # Include API routes
@@ -42,7 +43,7 @@ async def root():
     return {
         "message": "Welcome to PortKiller API",
         "docs": "/docs",
-        "version": settings.APP_VERSION
+        "version": settings.APP_VERSION,
     }
 
 
@@ -54,7 +55,8 @@ async def health_check():
 
 def main():
     """Run the application."""
-    print(f"""
+    print(
+        f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
 ║   🔌 PortKiller v{settings.APP_VERSION}                                        ║
@@ -64,14 +66,10 @@ def main():
 ║   ➜  API:     http://{settings.HOST}:{settings.PORT}/docs                   ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
-    """)
-
-    uvicorn.run(
-        "main:app",
-        host=settings.HOST,
-        port=settings.PORT,
-        reload=settings.DEBUG
+    """
     )
+
+    uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)
 
 
 if __name__ == "__main__":

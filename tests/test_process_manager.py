@@ -1,6 +1,7 @@
 """
 Unit tests for the ProcessManagerService.
 """
+
 import os
 from unittest.mock import Mock, patch
 
@@ -18,13 +19,13 @@ class TestProcessManagerService:
 
     def test_get_current_user_returns_username(self, process_manager):
         """Test getting the current username."""
-        with patch('os.getlogin', return_value="testuser"):
+        with patch("os.getlogin", return_value="testuser"):
             result = process_manager._get_current_user()
             assert result == "testuser"
 
     def test_get_current_user_fallback_to_env(self, process_manager):
         """Test fallback to environment variable when getlogin fails."""
-        with patch('os.getlogin', side_effect=OSError("No terminal")):
+        with patch("os.getlogin", side_effect=OSError("No terminal")):
             with patch.dict(os.environ, {"USERNAME": "envuser"}):
                 result = process_manager._get_current_user()
                 assert result == "envuser"
@@ -65,7 +66,7 @@ class TestActionLogging:
 
     def test_log_action_adds_to_list(self, process_manager):
         """Test that logging an action adds it to the list."""
-        with patch.object(process_manager, '_get_current_user', return_value="testuser"):
+        with patch.object(process_manager, "_get_current_user", return_value="testuser"):
             process_manager._log_action("TEST", 1234, "test.exe", 8080, "SUCCESS")
 
             assert len(process_manager.action_logs) == 1
@@ -79,7 +80,7 @@ class TestActionLogging:
 
     def test_log_action_limits_to_1000_entries(self, process_manager):
         """Test that logs are limited to 1000 entries."""
-        with patch.object(process_manager, '_get_current_user', return_value="testuser"):
+        with patch.object(process_manager, "_get_current_user", return_value="testuser"):
             # Add 1005 entries
             for i in range(1005):
                 process_manager._log_action("TEST", i, f"process_{i}", None, "SUCCESS")
@@ -88,7 +89,7 @@ class TestActionLogging:
 
     def test_log_action_logs_to_file(self, process_manager):
         """Test that actions are logged to file."""
-        with patch.object(process_manager, '_get_current_user', return_value="testuser"):
+        with patch.object(process_manager, "_get_current_user", return_value="testuser"):
             process_manager._log_action("KILL", 1234, "test.exe", 8080, "SUCCESS")
 
             process_manager.logger.info.assert_called()
@@ -99,7 +100,7 @@ class TestGetProcessInfo:
 
     def test_get_process_info_existing_process(self, process_manager):
         """Test getting info for an existing process."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "test.exe"
             mock_process_class.return_value = mock_process
@@ -112,7 +113,7 @@ class TestGetProcessInfo:
 
     def test_get_process_info_nonexistent_process(self, process_manager):
         """Test getting info for a non-existent process."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process_class.side_effect = psutil.NoSuchProcess(9999)
 
             exists, name, error = process_manager.get_process_info(9999)
@@ -123,7 +124,7 @@ class TestGetProcessInfo:
 
     def test_get_process_info_access_denied(self, process_manager):
         """Test getting info when access is denied."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process_class.side_effect = psutil.AccessDenied(1234)
 
             exists, name, error = process_manager.get_process_info(1234)
@@ -138,14 +139,14 @@ class TestKillProcess:
 
     def test_kill_process_success(self, process_manager):
         """Test successfully killing a process."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "test.exe"
             mock_process.wait.return_value = None
             mock_process_class.return_value = mock_process
 
-            with patch.object(process_manager, '_is_critical_process', return_value=False):
-                with patch('os.getpid', return_value=9999):
+            with patch.object(process_manager, "_is_critical_process", return_value=False):
+                with patch("os.getpid", return_value=9999):
                     result = process_manager.kill_process(1234, force=False)
 
                     assert result.success is True
@@ -156,14 +157,14 @@ class TestKillProcess:
 
     def test_kill_process_force_uses_sigkill(self, process_manager):
         """Test that force=True uses SIGKILL."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "test.exe"
             mock_process.wait.return_value = None
             mock_process_class.return_value = mock_process
 
-            with patch.object(process_manager, '_is_critical_process', return_value=False):
-                with patch('os.getpid', return_value=9999):
+            with patch.object(process_manager, "_is_critical_process", return_value=False):
+                with patch("os.getpid", return_value=9999):
                     result = process_manager.kill_process(1234, force=True)
 
                     assert result.success is True
@@ -171,12 +172,12 @@ class TestKillProcess:
 
     def test_kill_process_blocks_critical_process(self, process_manager):
         """Test that critical processes cannot be killed."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "svchost.exe"
             mock_process_class.return_value = mock_process
 
-            with patch.object(process_manager, '_is_critical_process', return_value=True):
+            with patch.object(process_manager, "_is_critical_process", return_value=True):
                 result = process_manager.kill_process(100, force=False)
 
                 assert result.success is False
@@ -188,12 +189,12 @@ class TestKillProcess:
         """Test that the app cannot terminate itself."""
         current_pid = os.getpid()
 
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "python.exe"
             mock_process_class.return_value = mock_process
 
-            with patch.object(process_manager, '_is_critical_process', return_value=False):
+            with patch.object(process_manager, "_is_critical_process", return_value=False):
                 result = process_manager.kill_process(current_pid, force=False)
 
                 assert result.success is False
@@ -202,7 +203,7 @@ class TestKillProcess:
 
     def test_kill_process_handles_no_such_process(self, process_manager):
         """Test handling when process doesn't exist."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process_class.side_effect = psutil.NoSuchProcess(9999)
 
             result = process_manager.kill_process(9999, force=False)
@@ -212,7 +213,7 @@ class TestKillProcess:
 
     def test_kill_process_handles_access_denied(self, process_manager):
         """Test handling when access to kill is denied."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process_class.side_effect = psutil.AccessDenied(1234)
 
             result = process_manager.kill_process(1234, force=False)
@@ -223,17 +224,17 @@ class TestKillProcess:
 
     def test_kill_process_timeout_then_force_kill(self, process_manager):
         """Test that timeout triggers force kill."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "stubborn.exe"
             mock_process.wait.side_effect = [
                 psutil.TimeoutExpired(3),  # First wait times out
-                None  # Second wait succeeds
+                None,  # Second wait succeeds
             ]
             mock_process_class.return_value = mock_process
 
-            with patch.object(process_manager, '_is_critical_process', return_value=False):
-                with patch('os.getpid', return_value=9999):
+            with patch.object(process_manager, "_is_critical_process", return_value=False):
+                with patch("os.getpid", return_value=9999):
                     result = process_manager.kill_process(1234, force=False)
 
                     assert result.success is True
@@ -243,14 +244,14 @@ class TestKillProcess:
 
     def test_kill_process_timeout_even_with_force_kill(self, process_manager):
         """Test handling when process doesn't terminate even with force."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "immortal.exe"
             mock_process.wait.side_effect = psutil.TimeoutExpired(3)
             mock_process_class.return_value = mock_process
 
-            with patch.object(process_manager, '_is_critical_process', return_value=False):
-                with patch('os.getpid', return_value=9999):
+            with patch.object(process_manager, "_is_critical_process", return_value=False):
+                with patch("os.getpid", return_value=9999):
                     result = process_manager.kill_process(1234, force=False)
 
                     assert result.success is False
@@ -258,7 +259,7 @@ class TestKillProcess:
 
     def test_kill_process_handles_unexpected_exception(self, process_manager):
         """Test handling of unexpected exceptions."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process_class.side_effect = Exception("Unexpected error")
 
             result = process_manager.kill_process(1234, force=False)
@@ -268,14 +269,14 @@ class TestKillProcess:
 
     def test_kill_process_logs_action(self, process_manager):
         """Test that kill actions are logged."""
-        with patch('psutil.Process') as mock_process_class:
+        with patch("psutil.Process") as mock_process_class:
             mock_process = Mock()
             mock_process.name.return_value = "test.exe"
             mock_process.wait.return_value = None
             mock_process_class.return_value = mock_process
 
-            with patch.object(process_manager, '_is_critical_process', return_value=False):
-                with patch('os.getpid', return_value=9999):
+            with patch.object(process_manager, "_is_critical_process", return_value=False):
+                with patch("os.getpid", return_value=9999):
                     process_manager.kill_process(1234, force=False, port=8080)
 
                     assert len(process_manager.action_logs) >= 1
@@ -289,7 +290,7 @@ class TestGetActionLogs:
 
     def test_get_action_logs_returns_recent_first(self, process_manager):
         """Test that logs are returned with most recent first."""
-        with patch.object(process_manager, '_get_current_user', return_value="testuser"):
+        with patch.object(process_manager, "_get_current_user", return_value="testuser"):
             for i in range(5):
                 process_manager._log_action("TEST", i, f"process_{i}", None, "SUCCESS")
 
@@ -301,7 +302,7 @@ class TestGetActionLogs:
 
     def test_get_action_logs_respects_limit(self, process_manager):
         """Test that the limit parameter is respected."""
-        with patch.object(process_manager, '_get_current_user', return_value="testuser"):
+        with patch.object(process_manager, "_get_current_user", return_value="testuser"):
             for i in range(10):
                 process_manager._log_action("TEST", i, f"process_{i}", None, "SUCCESS")
 
