@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # ====================
+  # CREATE RELEASE
+  # ====================
+  release:
+    name: 📦 Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests before release
+        run: python -m pytest tests/ -v --tb=short
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: PortKiller v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## 🔌 PortKiller v${{ steps.get_version.outputs.VERSION }}
+            
+            ### Installation
+            ```bash
+            git clone https://github.com/${{ github.repository }}.git
+            cd portkiller
+            pip install -r requirements.txt
+            python main.py
+            ```
+            
+            ### What's Changed
+            See the [CHANGELOG](CHANGELOG.md) for details.
+          draft: false
+          prerelease: false
+          generate_release_notes: true
