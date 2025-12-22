@@ -4,6 +4,7 @@ PortKiller - Main Application Entry Point
 A modern port management tool for developers and DevOps engineers.
 Desktop application with native window using pywebview.
 """
+
 # ruff: noqa: E402
 import os
 import sys
@@ -13,11 +14,11 @@ from pathlib import Path
 
 def fix_frozen_stdio():
     """Fix stdout/stderr for PyInstaller frozen mode (windowed)."""
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         if sys.stdout is None:
-            sys.stdout = open(os.devnull, 'w', encoding='utf-8')
+            sys.stdout = open(os.devnull, "w", encoding="utf-8")
         if sys.stderr is None:
-            sys.stderr = open(os.devnull, 'w', encoding='utf-8')
+            sys.stderr = open(os.devnull, "w", encoding="utf-8")
 
 
 # Apply fix before importing other modules
@@ -34,7 +35,7 @@ from app.routes.ports import router as ports_router
 
 def get_base_path() -> Path:
     """Get the base path for resources (handles PyInstaller frozen mode)."""
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, "frozen", False):
         return Path(sys._MEIPASS)
     return Path(__file__).parent
 
@@ -93,7 +94,7 @@ def run_server():
 
 def main():
     """Run the application."""
-    is_frozen = getattr(sys, 'frozen', False)
+    is_frozen = getattr(sys, "frozen", False)
 
     if is_frozen:
         # Desktop mode: Run server in background thread and show native window
@@ -105,6 +106,7 @@ def main():
 
         # Wait a moment for the server to start
         import time
+
         time.sleep(1)
 
         # Create native desktop window

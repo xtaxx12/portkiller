@@ -21,7 +21,9 @@ def build():
 
     # PyInstaller command with UAC admin flag
     cmd = [
-        sys.executable, "-m", "PyInstaller",
+        sys.executable,
+        "-m",
+        "PyInstaller",
         "--name=PortKiller",
         "--onefile",
         "--windowed",
