@@ -4,7 +4,7 @@
 
 **Professional Port Management & Process Control Tool**
 
-*Visualize open ports, identify processes, and manage network connections with a beautiful web interface.*
+*Visualize open ports, identify processes, and manage network connections with a beautiful native desktop application.*
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
@@ -16,6 +16,8 @@
 
 ## 🎯 Features
 
+- **🖥️ Native Desktop App** - Standalone Windows executable with native window
+- **🔐 Administrator Privileges** - Automatically requests UAC elevation to terminate any process
 - **📊 Real-time Dashboard** - View TCP/UDP statistics at a glance
 - **🔍 Advanced Filtering** - Filter by port, protocol, state, or process
 - **⚡ Process Termination** - Safely terminate processes with confirmation
@@ -26,7 +28,43 @@
 
 ---
 
-## 🚀 Quick Start
+## 💻 Desktop Executable (Windows)
+
+### Download & Run
+
+The easiest way to use PortKiller is the standalone executable:
+
+1. **Download** `PortKiller.exe` from the `dist/` folder
+2. **Double-click** to run
+3. **Accept the UAC prompt** (required for process termination)
+4. The app opens in a **native desktop window**
+
+### Features of the Desktop App
+
+| Feature | Description |
+|---------|-------------|
+| 🔐 **UAC Admin** | Automatically requests administrator privileges |
+| 🖥️ **Native Window** | Runs in a native desktop window (not browser) |
+| 📦 **Standalone** | No Python installation required |
+| ⚡ **Kill Any Process** | Can terminate any process (including system services) |
+
+### Build from Source
+
+To build the executable yourself:
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Build the executable
+python build_exe.py
+```
+
+The executable will be created at `dist/PortKiller.exe`
+
+---
+
+## 🚀 Quick Start (Development Mode)
 
 ### Prerequisites
 
@@ -89,8 +127,12 @@ portkiller/
 │       │   └── styles.css     # Styles (dark theme)
 │       └── js/
 │           └── app.js         # Frontend logic
+├── dist/                       # Built executable output
+│   └── PortKiller.exe         # Windows executable
 ├── logs/                       # Action logs directory
 ├── main.py                     # Application entry point
+├── build_exe.py                # PyInstaller build script
+├── portkiller.manifest         # Windows UAC manifest
 ├── requirements.txt            # Python dependencies
 └── README.md                   # This file
 ```
@@ -202,6 +244,12 @@ PORTKILLER_DEBUG=true python main.py
 PORTKILLER_PORT=9000 python main.py
 ```
 
+### Building the executable:
+
+```bash
+python build_exe.py
+```
+
 ---
 
 ## 📄 License
@@ -215,5 +263,3 @@ MIT License - feel free to use in your projects.
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
-
-
