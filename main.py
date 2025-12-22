@@ -4,8 +4,7 @@ PortKiller - Main Application Entry Point
 A modern port management tool for developers and DevOps engineers.
 Desktop application with native window using pywebview.
 """
-
-import io
+# ruff: noqa: E402
 import os
 import sys
 import threading
@@ -95,21 +94,21 @@ def run_server():
 def main():
     """Run the application."""
     is_frozen = getattr(sys, 'frozen', False)
-    
+
     if is_frozen:
         # Desktop mode: Run server in background thread and show native window
         import webview
-        
+
         # Start the API server in a background thread
         server_thread = threading.Thread(target=run_server, daemon=True)
         server_thread.start()
-        
+
         # Wait a moment for the server to start
         import time
         time.sleep(1)
-        
+
         # Create native desktop window
-        window = webview.create_window(
+        webview.create_window(
             title=f"PortKiller v{settings.APP_VERSION}",
             url=f"http://{settings.HOST}:{settings.PORT}",
             width=1200,
@@ -117,7 +116,7 @@ def main():
             resizable=True,
             min_size=(800, 600),
         )
-        
+
         # Start the webview (blocks until window is closed)
         webview.start()
     else:

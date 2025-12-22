@@ -14,12 +14,11 @@ from pathlib import Path
 
 def build():
     """Build the executable using PyInstaller."""
-    
     root_dir = Path(__file__).parent
     main_script = root_dir / "main.py"
     static_dir = root_dir / "app" / "static"
     icon_path = root_dir / "app" / "static" / "favicon.ico"
-    
+
     # PyInstaller command with UAC admin flag
     cmd = [
         sys.executable, "-m", "PyInstaller",
@@ -55,18 +54,18 @@ def build():
         "--collect-submodules=webview",
         "--collect-submodules=clr_loader",
     ]
-    
+
     # Add icon if exists
     if icon_path.exists():
         cmd.append(f"--icon={icon_path}")
-    
+
     # Add main script
     cmd.append(str(main_script))
-    
+
     print("🔨 Building PortKiller Desktop App...")
     print(f"   Command: {' '.join(cmd)}")
     print()
-    
+
     try:
         subprocess.run(cmd, check=True, cwd=root_dir)
         print()
