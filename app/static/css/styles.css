@@ -11,48 +11,48 @@
     --color-bg-tertiary: #1a1a25;
     --color-bg-card: rgba(26, 26, 37, 0.8);
     --color-bg-hover: rgba(45, 45, 65, 0.6);
-    
+
     --color-text-primary: #f0f0f5;
     --color-text-secondary: #a0a0b5;
     --color-text-muted: #6a6a80;
-    
+
     --color-accent-primary: #6366f1;
     --color-accent-secondary: #8b5cf6;
     --color-accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    
+
     --color-success: #10b981;
     --color-warning: #f59e0b;
     --color-danger: #ef4444;
     --color-info: #3b82f6;
-    
+
     --color-tcp: #3b82f6;
     --color-udp: #8b5cf6;
     --color-listen: #10b981;
     --color-established: #f59e0b;
     --color-critical: #ef4444;
-    
+
     /* Borders */
     --border-radius-sm: 6px;
     --border-radius-md: 10px;
     --border-radius-lg: 16px;
     --border-radius-xl: 24px;
     --border-color: rgba(255, 255, 255, 0.08);
-    
+
     /* Shadows */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
     --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
-    
+
     /* Typography */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-    
+
     /* Transitions */
     --transition-fast: 150ms ease;
     --transition-normal: 250ms ease;
     --transition-slow: 400ms ease;
-    
+
     /* Spacing */
     --spacing-xs: 4px;
     --spacing-sm: 8px;
@@ -62,8 +62,32 @@
     --spacing-2xl: 48px;
 }
 
+/* ===== Light Theme Override ===== */
+[data-theme="light"] {
+    /* Colors - Light Mode */
+    --color-bg-primary: #f5f5f7;
+    --color-bg-secondary: #ffffff;
+    --color-bg-tertiary: #e8e8ed;
+    --color-bg-card: rgba(255, 255, 255, 0.9);
+    --color-bg-hover: rgba(0, 0, 0, 0.05);
+
+    --color-text-primary: #1a1a2e;
+    --color-text-secondary: #4a4a5a;
+    --color-text-muted: #8a8a9a;
+
+    --border-color: rgba(0, 0, 0, 0.1);
+
+    /* Shadows - Light Mode */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.2);
+}
+
 /* ===== Global Reset ===== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -91,7 +115,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: 
+    background:
         radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
     pointer-events: none;
@@ -136,8 +160,15 @@ body::before {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
 }
 
 .logo h1 {
@@ -203,11 +234,11 @@ body::before {
     transition: var(--transition-normal);
 }
 
-.auto-refresh-toggle input:checked + .toggle-slider {
+.auto-refresh-toggle input:checked+.toggle-slider {
     background: var(--color-accent-primary);
 }
 
-.auto-refresh-toggle input:checked + .toggle-slider::after {
+.auto-refresh-toggle input:checked+.toggle-slider::after {
     left: 22px;
     background: white;
 }
@@ -234,8 +265,17 @@ body::before {
 }
 
 @keyframes pulseDot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.2); }
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
 }
 
 /* ===== Buttons ===== */
@@ -386,11 +426,30 @@ body::before {
     height: 24px;
 }
 
-.stat-tcp .stat-icon { background: rgba(59, 130, 246, 0.15); color: var(--color-tcp); }
-.stat-udp .stat-icon { background: rgba(139, 92, 246, 0.15); color: var(--color-udp); }
-.stat-listen .stat-icon { background: rgba(16, 185, 129, 0.15); color: var(--color-listen); }
-.stat-established .stat-icon { background: rgba(245, 158, 11, 0.15); color: var(--color-established); }
-.stat-processes .stat-icon { background: rgba(99, 102, 241, 0.15); color: var(--color-accent-primary); }
+.stat-tcp .stat-icon {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--color-tcp);
+}
+
+.stat-udp .stat-icon {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--color-udp);
+}
+
+.stat-listen .stat-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--color-listen);
+}
+
+.stat-established .stat-icon {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--color-established);
+}
+
+.stat-processes .stat-icon {
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--color-accent-primary);
+}
 
 .stat-content {
     display: flex;
@@ -546,8 +605,13 @@ body::before {
     opacity: 0.5;
 }
 
-.sortable.asc .sort-icon::after { content: '↑'; }
-.sortable.desc .sort-icon::after { content: '↓'; }
+.sortable.asc .sort-icon::after {
+    content: '↑';
+}
+
+.sortable.desc .sort-icon::after {
+    content: '↓';
+}
 
 .ports-table tbody tr {
     transition: var(--transition-fast);
@@ -655,7 +719,9 @@ body::before {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .empty-row td {
@@ -928,6 +994,7 @@ body::before {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -973,15 +1040,15 @@ body::before {
     .app-container {
         padding: var(--spacing-md);
     }
-    
+
     .stats-dashboard {
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     }
-    
+
     .stat-card {
         padding: var(--spacing-md);
     }
-    
+
     .stat-value {
         font-size: 1.5rem;
     }
@@ -992,29 +1059,30 @@ body::before {
         flex-direction: column;
         gap: var(--spacing-md);
     }
-    
-    .header-left, .header-right {
+
+    .header-left,
+    .header-right {
         width: 100%;
         justify-content: center;
     }
-    
+
     .filters-section {
         flex-direction: column;
     }
-    
+
     .search-container {
         max-width: 100%;
     }
-    
+
     .filter-chips {
         justify-content: center;
     }
-    
+
     .logs-drawer {
         width: 100%;
         right: -100%;
     }
-    
+
     .ports-table th:nth-child(4),
     .ports-table td:nth-child(4),
     .ports-table th:nth-child(5),
@@ -1027,7 +1095,7 @@ body::before {
     .stats-dashboard {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .stat-card:last-child {
         grid-column: span 2;
     }
@@ -1056,4 +1124,86 @@ body::before {
 ::selection {
     background: rgba(99, 102, 241, 0.3);
     color: inherit;
+}
+
+/* ===== Header Actions ===== */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+/* ===== Dropdown ===== */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--spacing-xs);
+    min-width: 180px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: var(--transition-normal);
+}
+
+.dropdown.open .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: block;
+    padding: var(--spacing-sm) var(--spacing-md);
+    color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: var(--transition-fast);
+}
+
+.dropdown-item:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-accent-primary);
+}
+
+.dropdown-divider {
+    height: 1px;
+    margin: var(--spacing-xs) 0;
+    background: var(--border-color);
+}
+
+/* ===== Theme Toggle Icons ===== */
+[data-theme="light"] .icon-sun {
+    display: none !important;
+}
+
+[data-theme="light"] .icon-moon {
+    display: block !important;
+}
+
+[data-theme="dark"] .icon-sun,
+:root .icon-sun {
+    display: block;
+}
+
+[data-theme="dark"] .icon-moon,
+:root .icon-moon {
+    display: none;
+}
+
+/* ===== Light Theme Background ===== */
+[data-theme="light"] body::before {
+    background:
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
 }
