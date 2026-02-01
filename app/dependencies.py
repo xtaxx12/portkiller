@@ -4,8 +4,7 @@ Dependency Injection Container for PortKiller.
 Provides centralized dependency management for better testability and decoupling.
 """
 
-from functools import lru_cache
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 from fastapi import Depends
 
@@ -19,42 +18,42 @@ T = TypeVar("T")
 class Container:
     """
     Dependency Injection Container.
-    
+
     Provides factory methods for creating service instances with proper dependencies.
     Supports both singleton and transient lifecycles.
     """
-    
+
     _instances: dict[type, object] = {}
-    
+
     @classmethod
     def get_settings(cls) -> Settings:
         """Get application settings instance."""
         return get_settings()
-    
+
     @classmethod
     def get_port_scanner(cls, settings: Settings = None) -> PortScanner:
         """
         Get PortScanner instance.
-        
+
         Uses singleton pattern for efficiency.
         """
         if PortScanner not in cls._instances:
             settings = settings or cls.get_settings()
             cls._instances[PortScanner] = PortScanner(settings)
         return cls._instances[PortScanner]
-    
+
     @classmethod
     def get_process_manager(cls, settings: Settings = None) -> ProcessManager:
         """
         Get ProcessManager instance.
-        
+
         Uses singleton pattern for efficiency.
         """
         if ProcessManager not in cls._instances:
             settings = settings or cls.get_settings()
             cls._instances[ProcessManager] = ProcessManager(settings)
         return cls._instances[ProcessManager]
-    
+
     @classmethod
     def reset(cls) -> None:
         """Reset all cached instances. Useful for testing."""

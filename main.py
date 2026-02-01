@@ -28,10 +28,10 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
+from app.exceptions import register_exception_handlers
 from app.middleware.rate_limit import RateLimits, limiter, rate_limit_exceeded_handler
 from app.routes.ports import router as ports_router
 
@@ -78,13 +78,12 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # Setup centralized exception handling
-from app.exceptions import register_exception_handlers
 register_exception_handlers(app)
 
 # Setup Prometheus metrics
 try:
     from prometheus_fastapi_instrumentator import Instrumentator
-    
+
     instrumentator = Instrumentator(
         should_group_status_codes=True,
         should_ignore_untemplated=True,
@@ -167,7 +166,7 @@ def main():
         time.sleep(1)
 
         # Create native desktop window with close confirmation
-        window = webview.create_window(
+        webview.create_window(
             title=f"PortKiller v{settings.APP_VERSION}",
             url=f"http://{settings.HOST}:{settings.PORT}",
             width=1200,

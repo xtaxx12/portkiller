@@ -2,10 +2,10 @@
 Process Manager Service - Handles process termination with safety checks.
 """
 
+from datetime import datetime
 import logging
 import os
-from datetime import datetime
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import psutil
 

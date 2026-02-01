@@ -10,10 +10,10 @@ hiddenimports += collect_submodules('clr_loader')
 
 
 a = Analysis(
-    ['D:\\portkiller\\main.py'],
+    ['C:\\Users\\USER\\Downloads\\projects\\portkiller\\main.py'],
     pathex=[],
     binaries=[],
-    datas=[('D:\\portkiller\\app\\static', 'app/static')],
+    datas=[('C:\\Users\\USER\\Downloads\\projects\\portkiller\\app\\static', 'app/static')],
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},

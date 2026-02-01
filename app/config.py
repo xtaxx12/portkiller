@@ -5,7 +5,6 @@ Supports environment variables and .env file loading with validation.
 """
 
 from functools import lru_cache
-from typing import Set
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -14,11 +13,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """
     Application settings with validation and environment variable support.
-    
+
     All settings can be overridden via environment variables with PORTKILLER_ prefix.
     Example: PORTKILLER_HOST=0.0.0.0 PORTKILLER_PORT=9000
     """
-    
+
     model_config = SettingsConfigDict(
         env_prefix="PORTKILLER_",
         env_file=".env",
@@ -85,7 +84,7 @@ class Settings(BaseSettings):
         return v.strip()
 
     @property
-    def CRITICAL_PROCESSES(self) -> Set[str]:
+    def CRITICAL_PROCESSES(self) -> set[str]:
         """
         Critical processes that should NOT be terminated.
         These are protected by default across all platforms.
@@ -115,7 +114,7 @@ class Settings(BaseSettings):
         }
 
     @property
-    def CRITICAL_PORTS(self) -> Set[int]:
+    def CRITICAL_PORTS(self) -> set[int]:
         """
         Critical ports (system ports that typically shouldn't be killed).
         """
@@ -137,7 +136,7 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """
     Get cached settings instance.
-    
+
     Uses lru_cache to ensure settings are only loaded once.
     """
     return Settings()

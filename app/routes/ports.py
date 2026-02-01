@@ -5,13 +5,21 @@ All endpoints are protected by rate limiting to prevent abuse.
 Uses Dependency Injection for better testability.
 """
 
+import csv
+import io
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 
 from ..dependencies import get_port_scanner, get_process_manager
 from ..middleware.rate_limit import RateLimits, limiter
-from ..models.port import ActionLog, PortInfo, ProcessKillRequest, ProcessKillResponse, SystemStats
+from ..models.port import (
+    ActionLog,
+    PortInfo,
+    ProcessKillRequest,
+    ProcessKillResponse,
+    SystemStats,
+)
 from ..services.port_scanner import PortScanner
 from ..services.process_manager import ProcessManager
 
@@ -213,10 +221,6 @@ async def export_ports(
     Args:
         format: Export format - 'json' or 'csv'
     """
-    from fastapi.responses import Response
-    import csv
-    import io
-
     connections = scanner.get_all_connections()
 
     if format.lower() == "csv":
@@ -266,10 +270,6 @@ async def export_logs(
         format: Export format - 'json' or 'csv'
         limit: Maximum number of log entries to export
     """
-    from fastapi.responses import Response
-    import csv
-    import io
-
     logs = manager.get_action_logs(limit)
 
     if format.lower() == "csv":

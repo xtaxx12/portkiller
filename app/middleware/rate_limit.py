@@ -15,7 +15,7 @@ from starlette.responses import JSONResponse
 def get_client_identifier(request: Request) -> str:
     """
     Get a unique identifier for the client making the request.
-    
+
     Uses the remote address, falling back to a default for local/internal requests.
     """
     # For local requests (desktop app), use a fixed identifier
@@ -37,12 +37,12 @@ limiter = Limiter(
 async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
     """
     Custom handler for rate limit exceeded errors.
-    
+
     Returns a user-friendly JSON response with retry information.
     """
     # Extract retry-after from the exception if available
     retry_after = getattr(exc, "retry_after", 60)
-    
+
     return JSONResponse(
         status_code=429,
         content={
@@ -59,20 +59,20 @@ async def rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded) 
 class RateLimits:
     """
     Centralized rate limit configurations.
-    
+
     Different limits for different types of operations:
     - READ operations (GET): More permissive
     - WRITE/DANGEROUS operations (POST kill): More restrictive
     """
-    
+
     # Read operations - data fetching
     PORTS_LIST = "60/minute"          # List all ports
     STATS = "60/minute"               # Get statistics
     LOGS = "30/minute"                # Get action logs
     PROCESS_INFO = "60/minute"        # Get process details
-    
+
     # Write/dangerous operations - process termination
     KILL_PROCESS = "10/minute"        # Terminate process (strict limit)
-    
+
     # Health check - very permissive for monitoring
     HEALTH = "120/minute"

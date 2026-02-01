@@ -4,6 +4,7 @@ Centralized Exception Handling for PortKiller API.
 Provides custom exceptions and global exception handlers for consistent error responses.
 """
 
+import traceback
 from typing import Any, Optional
 
 from fastapi import FastAPI, Request, status
@@ -15,7 +16,7 @@ from pydantic import BaseModel
 
 class PortKillerException(Exception):
     """Base exception for all PortKiller custom exceptions."""
-    
+
     def __init__(
         self,
         message: str,
@@ -32,7 +33,7 @@ class PortKillerException(Exception):
 
 class ProcessNotFoundError(PortKillerException):
     """Raised when a process is not found."""
-    
+
     def __init__(self, pid: int):
         super().__init__(
             message=f"Process with PID {pid} not found",
@@ -44,7 +45,7 @@ class ProcessNotFoundError(PortKillerException):
 
 class CriticalProcessError(PortKillerException):
     """Raised when attempting to terminate a critical process."""
-    
+
     def __init__(self, pid: int, process_name: str):
         super().__init__(
             message=f"Cannot terminate critical system process: {process_name}",
@@ -56,7 +57,7 @@ class CriticalProcessError(PortKillerException):
 
 class ProcessAccessDeniedError(PortKillerException):
     """Raised when access to a process is denied."""
-    
+
     def __init__(self, pid: int, reason: str = "Access denied"):
         super().__init__(
             message=f"Access denied to process {pid}: {reason}",
@@ -68,7 +69,7 @@ class ProcessAccessDeniedError(PortKillerException):
 
 class ProcessTerminationError(PortKillerException):
     """Raised when process termination fails."""
-    
+
     def __init__(self, pid: int, reason: str):
         super().__init__(
             message=f"Failed to terminate process {pid}: {reason}",
@@ -80,7 +81,7 @@ class ProcessTerminationError(PortKillerException):
 
 class ValidationError(PortKillerException):
     """Raised for input validation errors."""
-    
+
     def __init__(self, message: str, field: Optional[str] = None):
         super().__init__(
             message=message,
@@ -92,7 +93,7 @@ class ValidationError(PortKillerException):
 
 class ExportError(PortKillerException):
     """Raised when data export fails."""
-    
+
     def __init__(self, format: str, reason: str):
         super().__init__(
             message=f"Failed to export data as {format}: {reason}",
@@ -106,7 +107,7 @@ class ExportError(PortKillerException):
 
 class ErrorResponse(BaseModel):
     """Standard error response format."""
-    
+
     success: bool = False
     error_code: str
     message: str
@@ -135,9 +136,8 @@ async def generic_exception_handler(
 ) -> JSONResponse:
     """Handle unexpected exceptions with a generic error response."""
     # Log the error (in production, you'd want proper logging here)
-    import traceback
     traceback.print_exc()
-    
+
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=ErrorResponse(
