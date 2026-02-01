@@ -222,12 +222,35 @@ Environment variables:
 
 ## 🎨 UI Features
 
+### Theme Toggle
+
+Switch between **Dark** and **Light** themes:
+- Click the sun/moon icon in the header
+- Use `Ctrl+Shift+T` keyboard shortcut
+- Theme preference is saved in localStorage
+
+### Export Data
+
+Export ports and logs data from the header dropdown:
+- **Ports (JSON/CSV)** - Export all current port connections
+- **Logs (JSON/CSV)** - Export action history
+
+Or use the API directly:
+```bash
+# Export ports as CSV
+curl http://localhost:8787/api/export/ports?format=csv
+
+# Export logs as JSON
+curl http://localhost:8787/api/export/logs?format=json
+```
+
 ### Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
 | `/` | Focus search input |
 | `Ctrl+R` | Refresh data |
+| `Ctrl+Shift+T` | Toggle theme |
 | `Esc` | Close modals/drawers |
 
 ### Filter Chips
@@ -241,15 +264,20 @@ Environment variables:
 
 ---
 
-## 📸 Screenshots
+## � Monitoring & Metrics
 
-The interface features:
-- Dark glassmorphism theme
-- Real-time statistics dashboard
-- Searchable and sortable table
-- Confirmation modals
-- Toast notifications
-- Action logs drawer
+### Prometheus Metrics
+
+PortKiller exposes Prometheus metrics at `/metrics`:
+
+```bash
+curl http://localhost:8787/metrics
+```
+
+Available metrics include:
+- Request count and latency
+- Active requests in progress
+- HTTP status code distribution
 
 ---
 
