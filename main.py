@@ -25,11 +25,14 @@ def fix_frozen_stdio():
 fix_frozen_stdio()
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.config import settings
+from app.middleware.rate_limit import RateLimits, limiter, rate_limit_exceeded_handler
 from app.routes.ports import router as ports_router
 
 
@@ -48,6 +51,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Setup rate limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
 # Include API routes
 app.include_router(ports_router)
@@ -73,9 +80,10 @@ async def root():
     }
 
 
-@app.get("/health")
-async def health_check():
-    """Health check endpoint."""
+@app.get("/health", responses={429: {"description": "Rate limit exceeded"}})
+@limiter.limit(RateLimits.HEALTH)
+async def health_check(request: Request):
+    """Health check endpoint. Rate limited to 120 requests per minute."""
     return {"status": "healthy", "version": settings.APP_VERSION}
 
 
