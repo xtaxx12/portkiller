@@ -110,7 +110,12 @@ The executable will be created at `dist/PortKiller.exe`
 portkiller/
 ├── app/
 │   ├── __init__.py
-│   ├── config.py              # Configuration settings
+│   ├── config.py              # Pydantic Settings configuration
+│   ├── dependencies.py        # Dependency Injection container
+│   ├── exceptions.py          # Centralized exception handling
+│   ├── middleware/
+│   │   ├── __init__.py
+│   │   └── rate_limit.py      # Rate limiting middleware
 │   ├── models/
 │   │   ├── __init__.py
 │   │   └── port.py            # Pydantic data models
@@ -124,9 +129,10 @@ portkiller/
 │   └── static/
 │       ├── index.html         # Main HTML page
 │       ├── css/
-│       │   └── styles.css     # Styles (dark theme)
+│       │   └── styles.css     # Styles (dark/light theme)
 │       └── js/
 │           └── app.js         # Frontend logic
+├── tests/                      # Comprehensive test suite
 ├── dist/                       # Built executable output
 │   └── PortKiller.exe         # Windows executable
 ├── logs/                       # Action logs directory
@@ -148,7 +154,10 @@ portkiller/
 | `POST` | `/api/kill/{pid}` | Terminate a process |
 | `GET` | `/api/logs` | Get action logs |
 | `GET` | `/api/process/{pid}` | Get process details |
+| `GET` | `/api/export/ports` | Export ports (JSON/CSV) |
+| `GET` | `/api/export/logs` | Export logs (JSON/CSV) |
 | `GET` | `/health` | Health check endpoint |
+| `GET` | `/metrics` | Prometheus metrics |
 | `GET` | `/docs` | Swagger API documentation |
 
 ### Query Parameters
@@ -283,6 +292,25 @@ Available metrics include:
 
 ## 🔧 Development
 
+### Configuration
+
+PortKiller uses Pydantic Settings for configuration. Set environment variables with `PORTKILLER_` prefix:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORTKILLER_HOST` | `127.0.0.1` | Server host address |
+| `PORTKILLER_PORT` | `8787` | Server port number |
+| `PORTKILLER_DEBUG` | `false` | Enable debug mode |
+| `PORTKILLER_REFRESH_INTERVAL` | `5` | Auto-refresh interval (seconds) |
+
+You can also create a `.env` file in the project root:
+
+```env
+PORTKILLER_HOST=0.0.0.0
+PORTKILLER_PORT=9000
+PORTKILLER_DEBUG=true
+```
+
 ### Running in development mode:
 
 ```bash
@@ -293,6 +321,12 @@ PORTKILLER_DEBUG=true python main.py
 
 ```bash
 PORTKILLER_PORT=9000 python main.py
+```
+
+### Running tests:
+
+```bash
+python -m pytest tests/ -v
 ```
 
 ### Building the executable:
