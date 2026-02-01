@@ -175,3 +175,106 @@ async def get_process_details(request: Request, pid: int):
 
     return {"pid": pid, "name": name}
 
+
+# ===== Export Endpoints =====
+
+@router.get(
+    "/export/ports",
+    responses={429: {"description": "Rate limit exceeded"}},
+    tags=["export"],
+)
+@limiter.limit(RateLimits.PORTS_LIST)
+async def export_ports(
+    request: Request,
+    format: str = Query("json", description="Export format: json or csv"),
+):
+    """
+    Export all ports data in JSON or CSV format.
+
+    **Rate Limit:** 60 requests per minute
+
+    Args:
+        format: Export format - 'json' or 'csv'
+    """
+    from fastapi.responses import Response
+    import csv
+    import io
+
+    connections = port_scanner.get_all_connections()
+
+    if format.lower() == "csv":
+        output = io.StringIO()
+        writer = csv.writer(output)
+        # Header
+        writer.writerow([
+            "Port", "Protocol", "State", "PID", "Process Name",
+            "Local Address", "Remote Address", "Is Critical"
+        ])
+        # Data
+        for conn in connections:
+            writer.writerow([
+                conn.port, conn.protocol, conn.state, conn.pid or "",
+                conn.process_name or "", conn.local_address,
+                conn.remote_address or "", conn.is_critical
+            ])
+        csv_content = output.getvalue()
+        return Response(
+            content=csv_content,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=ports_export.csv"}
+        )
+    else:
+        # JSON format (default)
+        return [conn.model_dump() for conn in connections]
+
+
+@router.get(
+    "/export/logs",
+    responses={429: {"description": "Rate limit exceeded"}},
+    tags=["export"],
+)
+@limiter.limit(RateLimits.LOGS)
+async def export_logs(
+    request: Request,
+    format: str = Query("json", description="Export format: json or csv"),
+    limit: int = Query(1000, ge=1, le=10000, description="Maximum number of logs to export"),
+):
+    """
+    Export action logs in JSON or CSV format.
+
+    **Rate Limit:** 30 requests per minute
+
+    Args:
+        format: Export format - 'json' or 'csv'
+        limit: Maximum number of log entries to export
+    """
+    from fastapi.responses import Response
+    import csv
+    import io
+
+    logs = process_manager.get_action_logs(limit)
+
+    if format.lower() == "csv":
+        output = io.StringIO()
+        writer = csv.writer(output)
+        # Header
+        writer.writerow([
+            "Timestamp", "Action", "Target PID", "Target Process",
+            "Target Port", "Result", "User"
+        ])
+        # Data
+        for log in logs:
+            writer.writerow([
+                log.timestamp.isoformat(), log.action, log.target_pid or "",
+                log.target_process or "", log.target_port or "",
+                log.result, log.user or ""
+            ])
+        csv_content = output.getvalue()
+        return Response(
+            content=csv_content,
+            media_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename=logs_export.csv"}
+        )
+    else:
+        # JSON format (default)
+        return [log.model_dump() for log in logs]
