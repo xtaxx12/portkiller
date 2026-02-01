@@ -202,6 +202,7 @@ async def get_process_details(
 
 # ===== Export Endpoints =====
 
+
 @router.get(
     "/export/ports",
     responses={429: {"description": "Rate limit exceeded"}},
@@ -227,22 +228,37 @@ async def export_ports(
         output = io.StringIO()
         writer = csv.writer(output)
         # Header
-        writer.writerow([
-            "Port", "Protocol", "State", "PID", "Process Name",
-            "Local Address", "Remote Address", "Is Critical"
-        ])
+        writer.writerow(
+            [
+                "Port",
+                "Protocol",
+                "State",
+                "PID",
+                "Process Name",
+                "Local Address",
+                "Remote Address",
+                "Is Critical",
+            ]
+        )
         # Data
         for conn in connections:
-            writer.writerow([
-                conn.port, conn.protocol, conn.state, conn.pid or "",
-                conn.process_name or "", conn.local_address,
-                conn.remote_address or "", conn.is_critical
-            ])
+            writer.writerow(
+                [
+                    conn.port,
+                    conn.protocol,
+                    conn.state,
+                    conn.pid or "",
+                    conn.process_name or "",
+                    conn.local_address,
+                    conn.remote_address or "",
+                    conn.is_critical,
+                ]
+            )
         csv_content = output.getvalue()
         return Response(
             content=csv_content,
             media_type="text/csv",
-            headers={"Content-Disposition": "attachment; filename=ports_export.csv"}
+            headers={"Content-Disposition": "attachment; filename=ports_export.csv"},
         )
     else:
         # JSON format (default)
@@ -276,22 +292,27 @@ async def export_logs(
         output = io.StringIO()
         writer = csv.writer(output)
         # Header
-        writer.writerow([
-            "Timestamp", "Action", "Target PID", "Target Process",
-            "Target Port", "Result", "User"
-        ])
+        writer.writerow(
+            ["Timestamp", "Action", "Target PID", "Target Process", "Target Port", "Result", "User"]
+        )
         # Data
         for log in logs:
-            writer.writerow([
-                log.timestamp.isoformat(), log.action, log.target_pid or "",
-                log.target_process or "", log.target_port or "",
-                log.result, log.user or ""
-            ])
+            writer.writerow(
+                [
+                    log.timestamp.isoformat(),
+                    log.action,
+                    log.target_pid or "",
+                    log.target_process or "",
+                    log.target_port or "",
+                    log.result,
+                    log.user or "",
+                ]
+            )
         csv_content = output.getvalue()
         return Response(
             content=csv_content,
             media_type="text/csv",
-            headers={"Content-Disposition": "attachment; filename=logs_export.csv"}
+            headers={"Content-Disposition": "attachment; filename=logs_export.csv"},
         )
     else:
         # JSON format (default)

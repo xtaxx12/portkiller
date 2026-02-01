@@ -66,13 +66,13 @@ class RateLimits:
     """
 
     # Read operations - data fetching
-    PORTS_LIST = "60/minute"          # List all ports
-    STATS = "60/minute"               # Get statistics
-    LOGS = "30/minute"                # Get action logs
-    PROCESS_INFO = "60/minute"        # Get process details
+    PORTS_LIST = "60/minute"  # List all ports
+    STATS = "60/minute"  # Get statistics
+    LOGS = "30/minute"  # Get action logs
+    PROCESS_INFO = "60/minute"  # Get process details
 
     # Write/dangerous operations - process termination
-    KILL_PROCESS = "10/minute"        # Terminate process (strict limit)
+    KILL_PROCESS = "10/minute"  # Terminate process (strict limit)
 
     # Health check - very permissive for monitoring
     HEALTH = "120/minute"

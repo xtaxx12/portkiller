@@ -13,6 +13,7 @@ from pydantic import BaseModel
 
 # ===== Custom Exceptions =====
 
+
 class PortKillerException(Exception):
     """Base exception for all PortKiller custom exceptions."""
 
@@ -104,6 +105,7 @@ class ExportError(PortKillerException):
 
 # ===== Error Response Model =====
 
+
 class ErrorResponse(BaseModel):
     """Standard error response format."""
 
@@ -115,9 +117,8 @@ class ErrorResponse(BaseModel):
 
 # ===== Exception Handlers =====
 
-async def portkiller_exception_handler(
-    request: Request, exc: PortKillerException
-) -> JSONResponse:
+
+async def portkiller_exception_handler(request: Request, exc: PortKillerException) -> JSONResponse:
     """Handle all PortKiller custom exceptions."""
     return JSONResponse(
         status_code=exc.status_code,
@@ -130,9 +131,7 @@ async def portkiller_exception_handler(
     )
 
 
-async def generic_exception_handler(
-    request: Request, exc: Exception
-) -> JSONResponse:
+async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle unexpected exceptions with a generic error response."""
     # Log the error (in production, you'd want proper logging here)
     traceback.print_exc()
@@ -148,9 +147,7 @@ async def generic_exception_handler(
     )
 
 
-async def value_error_handler(
-    request: Request, exc: ValueError
-) -> JSONResponse:
+async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse:
     """Handle ValueError as validation errors."""
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -164,6 +161,7 @@ async def value_error_handler(
 
 
 # ===== Register Handlers =====
+
 
 def register_exception_handlers(app: FastAPI) -> None:
     """Register all exception handlers with the FastAPI app."""

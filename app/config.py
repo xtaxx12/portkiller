@@ -30,49 +30,30 @@ class Settings(BaseSettings):
     APP_NAME: str = Field(default="PortKiller", description="Application name")
     APP_VERSION: str = Field(default="1.1.0", description="Application version")
     APP_DESCRIPTION: str = Field(
-        default="Port Management & Process Control Tool",
-        description="Application description"
+        default="Port Management & Process Control Tool", description="Application description"
     )
 
     # Server settings
     HOST: str = Field(
         default="127.0.0.1",
         description="Server host address",
-        examples=["127.0.0.1", "0.0.0.0"]  # nosec B104
+        examples=["127.0.0.1", "0.0.0.0"],  # nosec B104
     )
-    PORT: int = Field(
-        default=8787,
-        ge=1,
-        le=65535,
-        description="Server port number"
-    )
-    DEBUG: bool = Field(
-        default=False,
-        description="Enable debug mode with hot reload"
-    )
+    PORT: int = Field(default=8787, ge=1, le=65535, description="Server port number")
+    DEBUG: bool = Field(default=False, description="Enable debug mode with hot reload")
 
     # Auto-refresh interval (seconds)
     REFRESH_INTERVAL: int = Field(
-        default=5,
-        ge=1,
-        le=60,
-        description="Auto-refresh interval in seconds"
+        default=5, ge=1, le=60, description="Auto-refresh interval in seconds"
     )
 
     # Logging
-    LOG_FILE: str = Field(
-        default="logs/portkiller.log",
-        description="Path to log file"
-    )
+    LOG_FILE: str = Field(default="logs/portkiller.log", description="Path to log file")
     LOG_MAX_SIZE: int = Field(
-        default=10 * 1024 * 1024,  # 10 MB
-        description="Maximum log file size in bytes"
+        default=10 * 1024 * 1024, description="Maximum log file size in bytes"  # 10 MB
     )
     LOG_BACKUP_COUNT: int = Field(
-        default=5,
-        ge=1,
-        le=10,
-        description="Number of log backup files to keep"
+        default=5, ge=1, le=10, description="Number of log backup files to keep"
     )
 
     @field_validator("HOST")
@@ -119,10 +100,10 @@ class Settings(BaseSettings):
         Critical ports (system ports that typically shouldn't be killed).
         """
         return {
-            22,   # SSH
-            53,   # DNS
-            67,   # DHCP
-            68,   # DHCP
+            22,  # SSH
+            53,  # DNS
+            67,  # DHCP
+            68,  # DHCP
             123,  # NTP
             135,  # RPC
             137,  # NetBIOS

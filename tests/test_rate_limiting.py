@@ -57,9 +57,7 @@ class TestRateLimiting:
         mock_request.client = Mock()
         mock_request.client.host = "127.0.0.1"
 
-        with patch(
-            "app.middleware.rate_limit.get_remote_address", return_value="127.0.0.1"
-        ):
+        with patch("app.middleware.rate_limit.get_remote_address", return_value="127.0.0.1"):
             identifier = get_client_identifier(mock_request)
             assert identifier == "local-client"
 
@@ -69,9 +67,7 @@ class TestRateLimiting:
         mock_request.client = Mock()
         mock_request.client.host = "192.168.1.100"
 
-        with patch(
-            "app.middleware.rate_limit.get_remote_address", return_value="192.168.1.100"
-        ):
+        with patch("app.middleware.rate_limit.get_remote_address", return_value="192.168.1.100"):
             identifier = get_client_identifier(mock_request)
             assert identifier == "192.168.1.100"
 
@@ -92,21 +88,15 @@ class TestRateLimiting:
     def test_ports_endpoint_accepts_request(self, test_client):
         """Test that ports endpoint accepts requests within rate limit."""
         # Mock the port scanner to avoid actual system calls
-        with patch(
-            "app.services.port_scanner.port_scanner.get_all_connections", return_value=[]
-        ):
+        with patch("app.services.port_scanner.port_scanner.get_all_connections", return_value=[]):
             response = test_client.get("/api/ports")
             # Should not be rate limited on first request
             assert response.status_code != 429
 
     def test_stats_endpoint_accepts_request(self, test_client):
         """Test that stats endpoint accepts requests within rate limit."""
-        with patch(
-            "app.services.port_scanner.port_scanner.get_all_connections", return_value=[]
-        ):
-            with patch(
-                "app.services.port_scanner.port_scanner.get_system_stats"
-            ) as mock_stats:
+        with patch("app.services.port_scanner.port_scanner.get_all_connections", return_value=[]):
+            with patch("app.services.port_scanner.port_scanner.get_system_stats") as mock_stats:
                 mock_stats.return_value = Mock(
                     total_tcp_ports=0,
                     total_udp_ports=0,

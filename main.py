@@ -180,8 +180,7 @@ def main():
         webview.start()
     else:
         # Development mode: Standard uvicorn with reload
-        print(
-            f"""
+        print(f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
 ║   🔌 PortKiller v{settings.APP_VERSION}                                        ║
@@ -191,8 +190,7 @@ def main():
 ║   ➜  API:     http://{settings.HOST}:{settings.PORT}/docs                   ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
-        """
-        )
+        """)
         uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=settings.DEBUG)
 
 

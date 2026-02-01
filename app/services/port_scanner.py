@@ -37,6 +37,7 @@ class PortScannerService:
         """Initialize the port scanner with optional settings injection."""
         if settings is None:
             from ..config import settings as default_settings
+
             settings = default_settings
         self._settings = settings
         self._process_cache: dict[int, str] = {}

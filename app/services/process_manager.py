@@ -25,6 +25,7 @@ class ProcessManagerService:
         """Initialize the process manager with optional settings injection."""
         if settings is None:
             from ..config import settings as default_settings
+
             settings = default_settings
         self._settings = settings
         self._setup_logging()
