@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     HOST: str = Field(
         default="127.0.0.1",
         description="Server host address",
-        examples=["127.0.0.1", "0.0.0.0"]
+        examples=["127.0.0.1", "0.0.0.0"]  # nosec B104
     )
     PORT: int = Field(
         default=8787,
