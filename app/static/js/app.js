@@ -15,7 +15,8 @@ const state = {
     searchQuery: '',
     autoRefresh: true,
     refreshInterval: null,
-    selectedProcess: null
+    selectedProcess: null,
+    theme: localStorage.getItem('theme') || 'dark'
 };
 
 // ===== API Service =====
@@ -107,6 +108,11 @@ const DOM = {
     closeDrawer: document.getElementById('closeDrawer'),
     logsContent: document.getElementById('logsContent'),
     logsBadge: document.getElementById('logsBadge'),
+
+    // Theme & Export
+    themeToggle: document.getElementById('themeToggle'),
+    exportBtn: document.getElementById('exportBtn'),
+    exportDropdown: document.getElementById('exportDropdown'),
 
     // Toast
     toastContainer: document.getElementById('toastContainer')
@@ -551,6 +557,9 @@ function initEventListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🔌 PortKiller initialized');
 
+    // Initialize theme
+    initTheme();
+
     // Initialize event listeners
     initEventListeners();
 
@@ -570,3 +579,74 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('beforeunload', () => {
     stopAutoRefresh();
 });
+
+// ===== Theme Functions =====
+function initTheme() {
+    // Apply saved theme or default to dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+}
+
+function setTheme(theme) {
+    state.theme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+
+    // Update icon visibility
+    const sunIcon = document.querySelector('.icon-sun');
+    const moonIcon = document.querySelector('.icon-moon');
+    if (sunIcon && moonIcon) {
+        if (theme === 'light') {
+            sunIcon.style.display = 'none';
+            moonIcon.style.display = 'block';
+        } else {
+            sunIcon.style.display = 'block';
+            moonIcon.style.display = 'none';
+        }
+    }
+}
+
+function toggleTheme() {
+    const newTheme = state.theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    UI.showToast('info', 'Theme Changed', `Switched to ${newTheme} mode`);
+}
+
+// ===== Export Dropdown =====
+function initExportDropdown() {
+    if (!DOM.exportBtn || !DOM.exportDropdown) return;
+
+    DOM.exportBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        DOM.exportDropdown.classList.toggle('open');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!DOM.exportDropdown.contains(e.target)) {
+            DOM.exportDropdown.classList.remove('open');
+        }
+    });
+}
+
+// Add to initEventListeners
+const originalInitEventListeners = initEventListeners;
+initEventListeners = function () {
+    originalInitEventListeners();
+
+    // Theme toggle
+    if (DOM.themeToggle) {
+        DOM.themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    // Export dropdown
+    initExportDropdown();
+
+    // Keyboard shortcut for theme toggle (Ctrl+Shift+T)
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.shiftKey && e.key === 'T') {
+            e.preventDefault();
+            toggleTheme();
+        }
+    });
+};
