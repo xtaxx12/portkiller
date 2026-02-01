@@ -2,16 +2,18 @@
 API Routes for port management.
 
 All endpoints are protected by rate limiting to prevent abuse.
+Uses Dependency Injection for better testability.
 """
 
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
+from ..dependencies import get_port_scanner, get_process_manager
 from ..middleware.rate_limit import RateLimits, limiter
 from ..models.port import ActionLog, PortInfo, ProcessKillRequest, ProcessKillResponse, SystemStats
-from ..services.port_scanner import port_scanner
-from ..services.process_manager import process_manager
+from ..services.port_scanner import PortScanner
+from ..services.process_manager import ProcessManager
 
 router = APIRouter(prefix="/api", tags=["ports"])
 
@@ -28,6 +30,7 @@ async def get_ports(
     protocol: Optional[str] = Query(None, description="Filter by protocol (TCP/UDP)"),
     process: Optional[str] = Query(None, description="Filter by process name (partial match)"),
     state: Optional[str] = Query(None, description="Filter by connection state"),
+    scanner: PortScanner = Depends(get_port_scanner),
 ):
     """
     Get list of all open ports with filtering options.
@@ -41,10 +44,10 @@ async def get_ports(
     - Associated process ID and name
     - Whether the process is critical
     """
-    connections = port_scanner.get_all_connections()
+    connections = scanner.get_all_connections()
 
     if any([port, protocol, process, state]):
-        connections = port_scanner.filter_connections(
+        connections = scanner.filter_connections(
             connections,
             port_filter=port,
             protocol_filter=protocol,
@@ -61,7 +64,10 @@ async def get_ports(
     responses={429: {"description": "Rate limit exceeded"}},
 )
 @limiter.limit(RateLimits.STATS)
-async def get_stats(request: Request):
+async def get_stats(
+    request: Request,
+    scanner: PortScanner = Depends(get_port_scanner),
+):
     """
     Get aggregated system statistics about ports and processes.
 
@@ -74,8 +80,8 @@ async def get_stats(request: Request):
     - Established connections
     - Unique processes
     """
-    connections = port_scanner.get_all_connections()
-    return port_scanner.get_system_stats(connections)
+    connections = scanner.get_all_connections()
+    return scanner.get_system_stats(connections)
 
 
 @router.post(
@@ -84,7 +90,11 @@ async def get_stats(request: Request):
     responses={429: {"description": "Rate limit exceeded - too many kill requests"}},
 )
 @limiter.limit(RateLimits.KILL_PROCESS)
-async def kill_process(request: Request, body: ProcessKillRequest):
+async def kill_process(
+    request: Request,
+    body: ProcessKillRequest,
+    manager: ProcessManager = Depends(get_process_manager),
+):
     """
     Terminate a process by its PID.
 
@@ -102,7 +112,7 @@ async def kill_process(request: Request, body: ProcessKillRequest):
     Returns:
         Result of the termination attempt
     """
-    return process_manager.kill_process(body.pid, body.force)
+    return manager.kill_process(body.pid, body.force)
 
 
 @router.post(
@@ -116,13 +126,14 @@ async def kill_process_by_id(
     pid: int,
     force: bool = Query(False, description="Force terminate if normal termination fails"),
     port: Optional[int] = Query(None, description="Port number for logging purposes"),
+    manager: ProcessManager = Depends(get_process_manager),
 ):
     """
     Terminate a process by its PID (path parameter version).
 
     **Rate Limit:** 10 requests per minute (strict limit for dangerous operations)
     """
-    return process_manager.kill_process(pid, force, port)
+    return manager.kill_process(pid, force, port)
 
 
 @router.get(
@@ -134,6 +145,7 @@ async def kill_process_by_id(
 async def get_logs(
     request: Request,
     limit: int = Query(100, ge=1, le=1000, description="Number of log entries to return"),
+    manager: ProcessManager = Depends(get_process_manager),
 ):
     """
     Get recent action logs.
@@ -147,7 +159,7 @@ async def get_logs(
     - Result
     - User who performed the action
     """
-    return process_manager.get_action_logs(limit)
+    return manager.get_action_logs(limit)
 
 
 @router.get(
@@ -159,13 +171,17 @@ async def get_logs(
     },
 )
 @limiter.limit(RateLimits.PROCESS_INFO)
-async def get_process_details(request: Request, pid: int):
+async def get_process_details(
+    request: Request,
+    pid: int,
+    manager: ProcessManager = Depends(get_process_manager),
+):
     """
     Get detailed information about a specific process.
 
     **Rate Limit:** 60 requests per minute
     """
-    exists, name, error = process_manager.get_process_info(pid)
+    exists, name, error = manager.get_process_info(pid)
 
     if not exists:
         raise HTTPException(status_code=404, detail=error)
@@ -187,6 +203,7 @@ async def get_process_details(request: Request, pid: int):
 async def export_ports(
     request: Request,
     format: str = Query("json", description="Export format: json or csv"),
+    scanner: PortScanner = Depends(get_port_scanner),
 ):
     """
     Export all ports data in JSON or CSV format.
@@ -200,7 +217,7 @@ async def export_ports(
     import csv
     import io
 
-    connections = port_scanner.get_all_connections()
+    connections = scanner.get_all_connections()
 
     if format.lower() == "csv":
         output = io.StringIO()
@@ -238,6 +255,7 @@ async def export_logs(
     request: Request,
     format: str = Query("json", description="Export format: json or csv"),
     limit: int = Query(1000, ge=1, le=10000, description="Maximum number of logs to export"),
+    manager: ProcessManager = Depends(get_process_manager),
 ):
     """
     Export action logs in JSON or CSV format.
@@ -252,7 +270,7 @@ async def export_logs(
     import csv
     import io
 
-    logs = process_manager.get_action_logs(limit)
+    logs = manager.get_action_logs(limit)
 
     if format.lower() == "csv":
         output = io.StringIO()

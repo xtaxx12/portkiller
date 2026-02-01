@@ -43,18 +43,43 @@ def get_base_path() -> Path:
     return Path(__file__).parent
 
 
-# Create FastAPI application
+# Create FastAPI application with improved documentation
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
-    description=settings.APP_DESCRIPTION,
+    description=f"""
+## {settings.APP_DESCRIPTION}
+
+PortKiller is a modern port management tool for developers and DevOps engineers.
+
+### Features
+- 🔍 Real-time port and process scanning
+- ⚡ Process termination with safety guards
+- 📊 System statistics and monitoring
+- 📁 Data export (JSON/CSV)
+- 🔒 Rate limiting protection
+
+### Quick Start
+- View all ports: `GET /api/ports`
+- Terminate process: `POST /api/kill/{{pid}}`
+- Export data: `GET /api/export/ports?format=csv`
+    """,
     docs_url="/docs",
     redoc_url="/redoc",
+    openapi_tags=[
+        {"name": "ports", "description": "Port and process management operations"},
+        {"name": "export", "description": "Data export endpoints"},
+        {"name": "monitoring", "description": "Health and metrics endpoints"},
+    ],
 )
 
 # Setup rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
+# Setup centralized exception handling
+from app.exceptions import register_exception_handlers
+register_exception_handlers(app)
 
 # Setup Prometheus metrics
 try:
