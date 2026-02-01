@@ -5,12 +5,14 @@ Process Manager Service - Handles process termination with safety checks.
 import logging
 import os
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import psutil
 
-from ..config import settings
 from ..models.port import ActionLog, ProcessKillResponse
+
+if TYPE_CHECKING:
+    from ..config import Settings
 
 
 class ProcessManagerService:
@@ -19,19 +21,24 @@ class ProcessManagerService:
     Handles process termination with proper error handling and logging.
     """
 
-    def __init__(self):
+    def __init__(self, settings: "Settings" = None):
+        """Initialize the process manager with optional settings injection."""
+        if settings is None:
+            from ..config import settings as default_settings
+            settings = default_settings
+        self._settings = settings
         self._setup_logging()
         self.action_logs: list[ActionLog] = []
 
     def _setup_logging(self):
         """Setup file logging for action audit trail."""
-        os.makedirs(os.path.dirname(settings.LOG_FILE), exist_ok=True)
+        os.makedirs(os.path.dirname(self._settings.LOG_FILE), exist_ok=True)
 
         self.logger = logging.getLogger("portkiller")
         self.logger.setLevel(logging.INFO)
 
         if not self.logger.handlers:
-            handler = logging.FileHandler(settings.LOG_FILE)
+            handler = logging.FileHandler(self._settings.LOG_FILE)
             handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
             self.logger.addHandler(handler)
 
@@ -39,7 +46,7 @@ class ProcessManagerService:
         """Check if the process is critical and shouldn't be terminated."""
         try:
             name = process.name().lower()
-            return name in {p.lower() for p in settings.CRITICAL_PROCESSES}
+            return name in {p.lower() for p in self._settings.CRITICAL_PROCESSES}
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             return False
 
@@ -181,5 +188,8 @@ class ProcessManagerService:
         return self.action_logs[-limit:][::-1]  # Most recent first
 
 
-# Singleton instance
+# Type alias for cleaner imports
+ProcessManager = ProcessManagerService
+
+# Default singleton instance for backwards compatibility
 process_manager = ProcessManagerService()

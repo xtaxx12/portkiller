@@ -2,12 +2,14 @@
 Port Scanner Service - Interfaces with the operating system to detect open ports.
 """
 
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 import psutil
 
-from ..config import settings
 from ..models.port import PortInfo, SystemStats
+
+if TYPE_CHECKING:
+    from ..config import Settings
 
 
 class PortScannerService:
@@ -31,7 +33,12 @@ class PortScannerService:
         "NONE": "NONE",
     }
 
-    def __init__(self):
+    def __init__(self, settings: "Settings" = None):
+        """Initialize the port scanner with optional settings injection."""
+        if settings is None:
+            from ..config import settings as default_settings
+            settings = default_settings
+        self._settings = settings
         self._process_cache: dict[int, str] = {}
 
     def _get_process_name(self, pid: Optional[int]) -> Optional[str]:
@@ -53,10 +60,10 @@ class PortScannerService:
     def _is_critical_process(self, process_name: Optional[str], port: int) -> bool:
         """Check if a process or port is critical."""
         if process_name and process_name.lower() in {
-            p.lower() for p in settings.CRITICAL_PROCESSES
+            p.lower() for p in self._settings.CRITICAL_PROCESSES
         }:
             return True
-        if port in settings.CRITICAL_PORTS:
+        if port in self._settings.CRITICAL_PORTS:
             return True
         return False
 
@@ -211,5 +218,8 @@ class PortScannerService:
         return result
 
 
-# Singleton instance
+# Type alias for cleaner imports
+PortScanner = PortScannerService
+
+# Default singleton instance for backwards compatibility
 port_scanner = PortScannerService()
