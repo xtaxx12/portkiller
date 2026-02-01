@@ -159,6 +159,29 @@ portkiller/
 - `process` - Filter by process name (partial match)
 - `state` - Filter by connection state
 
+### Rate Limiting
+
+All API endpoints are protected by rate limiting to prevent abuse:
+
+| Endpoint | Limit | Description |
+|----------|-------|-------------|
+| `GET /api/ports` | 60/min | Port listing |
+| `GET /api/stats` | 60/min | Statistics |
+| `GET /api/logs` | 30/min | Action logs |
+| `GET /api/process/{pid}` | 60/min | Process details |
+| `POST /api/kill/{pid}` | **10/min** | Process termination (strict) |
+| `GET /health` | 120/min | Health check |
+
+When rate limit is exceeded, the API returns:
+```json
+{
+  "success": false,
+  "error": "rate_limit_exceeded",
+  "message": "Too many requests. Please try again in 60 seconds.",
+  "retry_after": 60
+}
+```
+
 ---
 
 ## 🔐 Security Features
