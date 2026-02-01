@@ -4,6 +4,7 @@ psutil==5.9.6
 python-multipart==0.0.6
 slowapi==0.1.9
 prometheus-fastapi-instrumentator==6.1.0
+pydantic-settings==2.1.0
 
 # Build
 pyinstaller>=6.10.0
