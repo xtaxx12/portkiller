@@ -56,6 +56,24 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
+# Setup Prometheus metrics
+try:
+    from prometheus_fastapi_instrumentator import Instrumentator
+    
+    instrumentator = Instrumentator(
+        should_group_status_codes=True,
+        should_ignore_untemplated=True,
+        should_respect_env_var=True,
+        should_instrument_requests_inprogress=True,
+        excluded_handlers=["/metrics", "/health"],
+        inprogress_name="portkiller_inprogress",
+        inprogress_labels=True,
+    )
+    instrumentator.instrument(app).expose(app, include_in_schema=True, tags=["monitoring"])
+except ImportError:
+    # Prometheus not available (e.g., in frozen mode without the dependency)
+    pass
+
 # Include API routes
 app.include_router(ports_router)
 
@@ -108,6 +126,12 @@ def main():
         # Desktop mode: Run server in background thread and show native window
         import webview
 
+        def on_closing():
+            """Handle window close event with confirmation."""
+            # Return True to allow close, False to prevent
+            # The confirmation is handled by pywebview's confirm_close parameter
+            return True
+
         # Start the API server in a background thread
         server_thread = threading.Thread(target=run_server, daemon=True)
         server_thread.start()
@@ -117,14 +141,15 @@ def main():
 
         time.sleep(1)
 
-        # Create native desktop window
-        webview.create_window(
+        # Create native desktop window with close confirmation
+        window = webview.create_window(
             title=f"PortKiller v{settings.APP_VERSION}",
             url=f"http://{settings.HOST}:{settings.PORT}",
             width=1200,
             height=800,
             resizable=True,
             min_size=(800, 600),
+            confirm_close=True,  # Show confirmation dialog on close
         )
 
         # Start the webview (blocks until window is closed)
