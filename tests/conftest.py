@@ -14,10 +14,20 @@ from fastapi.testclient import TestClient
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from app.config import get_settings
+from app.dependencies import Container
 from app.models.port import PortInfo
 from app.services.port_scanner import PortScannerService
 from app.services.process_manager import ProcessManagerService
 from main import app
+
+
+@pytest.fixture(autouse=True)
+def reset_container():
+    """Reset the DI container before each test."""
+    Container.reset()
+    yield
+    Container.reset()
 
 
 @pytest.fixture
@@ -27,16 +37,22 @@ def test_client():
 
 
 @pytest.fixture
-def port_scanner():
-    """Create a fresh PortScannerService instance for testing."""
-    return PortScannerService()
+def settings():
+    """Get application settings for testing."""
+    return get_settings()
 
 
 @pytest.fixture
-def process_manager():
+def port_scanner(settings):
+    """Create a fresh PortScannerService instance for testing."""
+    return PortScannerService(settings)
+
+
+@pytest.fixture
+def process_manager(settings):
     """Create a fresh ProcessManagerService instance for testing."""
     with patch.object(ProcessManagerService, "_setup_logging"):
-        manager = ProcessManagerService()
+        manager = ProcessManagerService(settings)
         manager.logger = Mock()
         manager.action_logs = []
         return manager
