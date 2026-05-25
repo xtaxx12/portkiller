@@ -82,6 +82,18 @@ const DOM = {
     establishedCount: document.getElementById('establishedCount'),
     processCount: document.getElementById('processCount'),
 
+    // Telemetry bars
+    tcpBar: document.getElementById('tcpBar'),
+    udpBar: document.getElementById('udpBar'),
+    listenBar: document.getElementById('listenBar'),
+    estBar: document.getElementById('estBar'),
+    procBar: document.getElementById('procBar'),
+
+    // Status bar / uptime
+    sbNodes: document.getElementById('sbNodes'),
+    sbSync: document.getElementById('sbSync'),
+    uptime: document.getElementById('uptime'),
+
     // Table
     portsTableBody: document.getElementById('portsTableBody'),
     resultsCount: document.getElementById('resultsCount'),
@@ -123,17 +135,59 @@ const UI = {
     updateStats(stats) {
         if (!stats) return;
 
-        DOM.tcpCount.textContent = stats.total_tcp_ports;
-        DOM.udpCount.textContent = stats.total_udp_ports;
-        DOM.listenCount.textContent = stats.listening_ports;
-        DOM.establishedCount.textContent = stats.established_connections;
-        DOM.processCount.textContent = stats.unique_processes;
+        const targets = [
+            [DOM.tcpCount, stats.total_tcp_ports],
+            [DOM.udpCount, stats.total_udp_ports],
+            [DOM.listenCount, stats.listening_ports],
+            [DOM.establishedCount, stats.established_connections],
+            [DOM.processCount, stats.unique_processes],
+        ];
 
-        // Animate numbers
-        document.querySelectorAll('.stat-value').forEach(el => {
-            el.classList.add('updated');
-            setTimeout(() => el.classList.remove('updated'), 300);
+        targets.forEach(([el, value]) => {
+            if (!el) return;
+            const prev = parseInt(el.dataset.value || '0', 10);
+            this.tickNumber(el, prev, value);
+            el.dataset.value = value;
         });
+
+        // Telemetry bars — fill proportional to the largest channel
+        const max = Math.max(
+            stats.total_tcp_ports,
+            stats.total_udp_ports,
+            stats.listening_ports,
+            stats.established_connections,
+            stats.unique_processes,
+            1
+        );
+        const setBar = (el, v) => { if (el) el.style.width = (v / max * 100) + '%'; };
+        setBar(DOM.tcpBar, stats.total_tcp_ports);
+        setBar(DOM.udpBar, stats.total_udp_ports);
+        setBar(DOM.listenBar, stats.listening_ports);
+        setBar(DOM.estBar, stats.established_connections);
+        setBar(DOM.procBar, stats.unique_processes);
+
+        // Status bar
+        const totalNodes = stats.total_tcp_ports + stats.total_udp_ports;
+        if (DOM.sbNodes) DOM.sbNodes.textContent = String(totalNodes).padStart(3, '0');
+    },
+
+    tickNumber(el, from, to) {
+        const pad = (n) => String(Math.max(0, n)).padStart(3, '0');
+        const duration = 420;
+        const start = performance.now();
+        const delta = to - from;
+        const step = (now) => {
+            const t = Math.min(1, (now - start) / duration);
+            // ease-out cubic
+            const eased = 1 - Math.pow(1 - t, 3);
+            el.textContent = pad(Math.round(from + delta * eased));
+            if (t < 1) requestAnimationFrame(step);
+        };
+        el.classList.remove('tick');
+        // force reflow so the animation re-triggers
+        void el.offsetWidth;
+        el.classList.add('tick');
+        requestAnimationFrame(step);
     },
 
     updateTable(ports) {
@@ -141,20 +195,17 @@ const UI = {
             DOM.portsTableBody.innerHTML = `
                 <tr class="empty-row">
                     <td colspan="8">
-                        <div style="padding: 2rem;">
-                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔍</div>
-                            <div>No ports found matching your criteria</div>
-                        </div>
+                        // NO NODES MATCH CURRENT QUERY · ADJUST FILTERS OR CLEAR SEARCH
                     </td>
                 </tr>
             `;
-            DOM.resultsCount.textContent = '0 results';
+            DOM.resultsCount.textContent = '000 RESULTS';
             return;
         }
 
         const html = ports.map(port => this.createTableRow(port)).join('');
         DOM.portsTableBody.innerHTML = html;
-        DOM.resultsCount.textContent = `${ports.length} result${ports.length !== 1 ? 's' : ''}`;
+        DOM.resultsCount.textContent = `${String(ports.length).padStart(3, '0')} RESULT${ports.length !== 1 ? 'S' : ''}`;
 
         // Add event listeners to kill buttons
         document.querySelectorAll('.btn-kill').forEach(btn => {
@@ -222,8 +273,12 @@ const UI = {
 
     updateLastRefresh() {
         const now = new Date();
-        const timeStr = now.toLocaleTimeString();
-        DOM.updateTime.textContent = timeStr;
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+        const timeStr = `${hh}:${mm}:${ss}`;
+        if (DOM.updateTime) DOM.updateTime.textContent = timeStr;
+        if (DOM.sbSync) DOM.sbSync.textContent = timeStr;
     },
 
     toggleLogsDrawer(show) {
@@ -309,8 +364,10 @@ const UI = {
         DOM.portsTableBody.innerHTML = `
             <tr class="loading-row">
                 <td colspan="8">
-                    <div class="loading-spinner"></div>
-                    <span>Loading ports...</span>
+                    <div class="loading-block">
+                        <span class="loading-pulse"></span>
+                        <span class="loading-text">SCANNING&nbsp;PORTS<span class="loading-dots"></span></span>
+                    </div>
                 </td>
             </tr>
         `;
@@ -555,7 +612,7 @@ function initEventListeners() {
 
 // ===== Initialization =====
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🔌 PortKiller initialized');
+    console.log('// PORTKILLER · INDUSTRIAL TELEMETRY · ONLINE');
 
     // Initialize theme
     initTheme();
@@ -573,6 +630,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.autoRefresh) {
         startAutoRefresh();
     }
+
+    // Uptime ticker — instrument feel
+    const bootAt = Date.now();
+    const updateUptime = () => {
+        if (!DOM.uptime) return;
+        const s = Math.floor((Date.now() - bootAt) / 1000);
+        const hh = String(Math.floor(s / 3600)).padStart(2, '0');
+        const mm = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+        const ss = String(s % 60).padStart(2, '0');
+        DOM.uptime.textContent = `${hh}:${mm}:${ss}`;
+    };
+    updateUptime();
+    setInterval(updateUptime, 1000);
 });
 
 // Clean up on page unload

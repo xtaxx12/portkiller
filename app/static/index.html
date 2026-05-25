@@ -1,275 +1,358 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PortKiller - Port management and process control tool for developers">
-    <title>PortKiller - Port Management Tool</title>
+    <meta name="description" content="PortKiller — Port inspection and process termination utility">
+    <title>PORTKILLER ── PORT INSPECTION &amp; PROCESS TERMINATION UTILITY</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Major+Mono+Display&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-left">
-                <div class="logo">
-                    <span class="logo-icon">🔌</span>
-                    <h1>PortKiller</h1>
-                    <span class="version-badge">v1.0.0</span>
-                </div>
+    <!-- atmosphere: dotted technical grid + scan haze -->
+    <div class="grid-overlay" aria-hidden="true"></div>
+    <div class="scan-haze" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <main class="console">
+
+        <!-- ============ 01 / IDENT ============ -->
+        <header class="ident" id="ident">
+            <div class="ident-rail">
+                <span class="rail-tag">01</span>
+                <span class="rail-line"></span>
+                <span class="rail-label">IDENT</span>
             </div>
-            <div class="header-right">
-                <div class="refresh-controls">
-                    <label class="auto-refresh-toggle">
-                        <input type="checkbox" id="autoRefresh" checked>
-                        <span class="toggle-slider"></span>
-                        <span class="toggle-label">Auto-refresh</span>
-                    </label>
-                    <button class="btn btn-icon" id="refreshBtn" title="Refresh Now">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="header-actions">
-                    <!-- Theme Toggle -->
-                    <button class="btn btn-icon" id="themeToggle" title="Toggle Theme">
-                        <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="5"/>
-                            <line x1="12" y1="1" x2="12" y2="3"/>
-                            <line x1="12" y1="21" x2="12" y2="23"/>
-                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                            <line x1="1" y1="12" x2="3" y2="12"/>
-                            <line x1="21" y1="12" x2="23" y2="12"/>
-                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                        </svg>
-                        <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                        </svg>
-                    </button>
-                    <!-- Export Dropdown -->
-                    <div class="dropdown" id="exportDropdown">
-                        <button class="btn btn-icon" id="exportBtn" title="Export Data">
-                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                <polyline points="7 10 12 15 17 10"/>
-                                <line x1="12" y1="15" x2="12" y2="3"/>
-                            </svg>
-                        </button>
-                        <div class="dropdown-menu" id="exportMenu">
-                            <a href="/api/export/ports?format=json" class="dropdown-item">📋 Ports (JSON)</a>
-                            <a href="/api/export/ports?format=csv" class="dropdown-item">📊 Ports (CSV)</a>
-                            <div class="dropdown-divider"></div>
-                            <a href="/api/export/logs?format=json" class="dropdown-item">📋 Logs (JSON)</a>
-                            <a href="/api/export/logs?format=csv" class="dropdown-item">📊 Logs (CSV)</a>
-                        </div>
+
+            <div class="ident-body">
+                <div class="ident-left">
+                    <div class="brand">
+                        <span class="brand-glyph" aria-hidden="true">
+                            <span class="glyph-pin"></span>
+                            <span class="glyph-pin"></span>
+                            <span class="glyph-pin"></span>
+                            <span class="glyph-pin"></span>
+                        </span>
+                        <h1 class="brand-name">PORTKILLER</h1>
+                        <span class="brand-divider"></span>
+                        <p class="brand-tagline">PORT&nbsp;INSPECTION &amp; PROCESS&nbsp;TERMINATION&nbsp;UTILITY</p>
+                    </div>
+                    <div class="brand-meta">
+                        <span class="meta-chip">REV&nbsp;1.0.0</span>
+                        <span class="meta-chip">CHANNEL&nbsp;A</span>
+                        <span class="meta-chip">LOCAL&nbsp;NODE</span>
                     </div>
                 </div>
-                <div class="last-update" id="lastUpdate">
-                    <span class="pulse-dot"></span>
-                    <span id="updateTime">--</span>
+
+                <div class="ident-right">
+                    <div class="signal" id="lastUpdate">
+                        <span class="signal-led" aria-hidden="true"></span>
+                        <div class="signal-stack">
+                            <span class="signal-label">LIVE&nbsp;SIGNAL</span>
+                            <span class="signal-time" id="updateTime">--:--:--</span>
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <label class="auto-refresh" title="Toggle auto-refresh">
+                            <input type="checkbox" id="autoRefresh" checked>
+                            <span class="auto-switch">
+                                <span class="auto-knob"></span>
+                            </span>
+                            <span class="auto-text">AUTO<span class="auto-text-dim">/5s</span></span>
+                        </label>
+
+                        <button type="button" class="ctl" id="refreshBtn" title="Refresh now">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                            </svg>
+                            <span class="ctl-label">SYNC</span>
+                        </button>
+
+                        <button type="button" class="ctl" id="themeToggle" title="Toggle theme">
+                            <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="4"/>
+                                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                            </svg>
+                            <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                            </svg>
+                            <span class="ctl-label">THEME</span>
+                        </button>
+
+                        <div class="dropdown" id="exportDropdown">
+                            <button type="button" class="ctl" id="exportBtn" title="Export data">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                <span class="ctl-label">EXPORT</span>
+                            </button>
+                            <div class="dropdown-menu" id="exportMenu">
+                                <span class="dropdown-section">// PORT REGISTRY</span>
+                                <a href="/api/export/ports?format=json" class="dropdown-item"><span class="di-key">.json</span><span class="di-val">ports</span></a>
+                                <a href="/api/export/ports?format=csv" class="dropdown-item"><span class="di-key">.csv</span><span class="di-val">ports</span></a>
+                                <div class="dropdown-divider"></div>
+                                <span class="dropdown-section">// ACTION LOG</span>
+                                <a href="/api/export/logs?format=json" class="dropdown-item"><span class="di-key">.json</span><span class="di-val">logs</span></a>
+                                <a href="/api/export/logs?format=csv" class="dropdown-item"><span class="di-key">.csv</span><span class="di-val">logs</span></a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <!-- Stats Dashboard -->
-        <section class="stats-dashboard">
-            <div class="stat-card stat-tcp">
-                <div class="stat-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                    </svg>
+        <!-- ============ 02 / TELEMETRY ============ -->
+        <section class="telemetry" aria-labelledby="telemetry-label">
+            <div class="section-head">
+                <div class="ident-rail">
+                    <span class="rail-tag">02</span>
+                    <span class="rail-line"></span>
+                    <span class="rail-label" id="telemetry-label">TELEMETRY</span>
                 </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="tcpCount">--</span>
-                    <span class="stat-label">TCP Ports</span>
-                </div>
-            </div>
-            <div class="stat-card stat-udp">
-                <div class="stat-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="udpCount">--</span>
-                    <span class="stat-label">UDP Ports</span>
+                <div class="section-meta">
+                    <span>SCAN&nbsp;INTERVAL&nbsp;<b>5.0s</b></span>
+                    <span>UPTIME&nbsp;<b id="uptime">00:00:00</b></span>
                 </div>
             </div>
-            <div class="stat-card stat-listen">
-                <div class="stat-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <circle cx="12" cy="12" r="3"/>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="listenCount">--</span>
-                    <span class="stat-label">Listening</span>
-                </div>
-            </div>
-            <div class="stat-card stat-established">
-                <div class="stat-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="establishedCount">--</span>
-                    <span class="stat-label">Established</span>
-                </div>
-            </div>
-            <div class="stat-card stat-processes">
-                <div class="stat-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                        <line x1="8" y1="21" x2="16" y2="21"/>
-                        <line x1="12" y1="17" x2="12" y2="21"/>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <span class="stat-value" id="processCount">--</span>
-                    <span class="stat-label">Processes</span>
-                </div>
+
+            <div class="readouts">
+                <article class="readout" data-channel="tcp">
+                    <span class="readout-chan">CH&nbsp;01 / TCP</span>
+                    <span class="readout-num" id="tcpCount" data-value="0">000</span>
+                    <span class="readout-bar"><span class="readout-fill" id="tcpBar"></span></span>
+                    <span class="readout-label">TRANSMISSION&nbsp;CONTROL</span>
+                </article>
+                <article class="readout" data-channel="udp">
+                    <span class="readout-chan">CH&nbsp;02 / UDP</span>
+                    <span class="readout-num" id="udpCount" data-value="0">000</span>
+                    <span class="readout-bar"><span class="readout-fill" id="udpBar"></span></span>
+                    <span class="readout-label">USER&nbsp;DATAGRAM</span>
+                </article>
+                <article class="readout" data-channel="listen">
+                    <span class="readout-chan">CH&nbsp;03 / LSTN</span>
+                    <span class="readout-num" id="listenCount" data-value="0">000</span>
+                    <span class="readout-bar"><span class="readout-fill" id="listenBar"></span></span>
+                    <span class="readout-label">LISTENING&nbsp;SOCKETS</span>
+                </article>
+                <article class="readout" data-channel="est">
+                    <span class="readout-chan">CH&nbsp;04 / EST</span>
+                    <span class="readout-num" id="establishedCount" data-value="0">000</span>
+                    <span class="readout-bar"><span class="readout-fill" id="estBar"></span></span>
+                    <span class="readout-label">ESTABLISHED&nbsp;LINKS</span>
+                </article>
+                <article class="readout" data-channel="proc">
+                    <span class="readout-chan">CH&nbsp;05 / PROC</span>
+                    <span class="readout-num" id="processCount" data-value="0">000</span>
+                    <span class="readout-bar"><span class="readout-fill" id="procBar"></span></span>
+                    <span class="readout-label">DISTINCT&nbsp;PROCESSES</span>
+                </article>
             </div>
         </section>
 
-        <!-- Filters Section -->
-        <section class="filters-section">
-            <div class="search-container">
-                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" id="searchInput" placeholder="Search by port, process, or address..." class="search-input">
-                <button class="btn btn-clear" id="clearSearch" title="Clear search">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
+        <!-- ============ 03 / FILTERS ============ -->
+        <section class="filters" aria-labelledby="filters-label">
+            <div class="section-head">
+                <div class="ident-rail">
+                    <span class="rail-tag">03</span>
+                    <span class="rail-line"></span>
+                    <span class="rail-label" id="filters-label">FILTERS</span>
+                </div>
+                <div class="section-meta">
+                    <span class="results-count" id="resultsCount">— RESULTS</span>
+                </div>
             </div>
-            <div class="filter-chips">
-                <button class="filter-chip active" data-filter="all">All</button>
-                <button class="filter-chip" data-filter="tcp">TCP</button>
-                <button class="filter-chip" data-filter="udp">UDP</button>
-                <button class="filter-chip" data-filter="listen">LISTEN</button>
-                <button class="filter-chip" data-filter="established">ESTABLISHED</button>
-                <button class="filter-chip" data-filter="critical">⚠️ Critical</button>
+
+            <div class="filter-bar">
+                <div class="search">
+                    <span class="search-prompt" aria-hidden="true">QUERY&nbsp;<span class="search-arrow">»</span></span>
+                    <input type="text" id="searchInput" placeholder="port  ·  process  ·  address" class="search-input" autocomplete="off" spellcheck="false">
+                    <span class="search-caret" aria-hidden="true"></span>
+                    <button type="button" class="search-clear" id="clearSearch" title="Clear">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="chip-bank">
+                    <button type="button" class="filter-chip active" data-filter="all">
+                        <span class="chip-mark">[</span><span class="chip-text">ALL</span><span class="chip-mark">]</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-filter="tcp">
+                        <span class="chip-mark">[</span><span class="chip-text">TCP</span><span class="chip-mark">]</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-filter="udp">
+                        <span class="chip-mark">[</span><span class="chip-text">UDP</span><span class="chip-mark">]</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-filter="listen">
+                        <span class="chip-mark">[</span><span class="chip-text">LISTEN</span><span class="chip-mark">]</span>
+                    </button>
+                    <button type="button" class="filter-chip" data-filter="established">
+                        <span class="chip-mark">[</span><span class="chip-text">ESTABLISHED</span><span class="chip-mark">]</span>
+                    </button>
+                    <button type="button" class="filter-chip chip-critical" data-filter="critical">
+                        <span class="chip-mark">[</span><span class="chip-text">⚠&nbsp;CRITICAL</span><span class="chip-mark">]</span>
+                    </button>
+                </nav>
             </div>
         </section>
 
-        <!-- Ports Table -->
-        <section class="table-section">
-            <div class="table-container">
+        <!-- ============ 04 / ACTIVE NODES ============ -->
+        <section class="nodes" aria-labelledby="nodes-label">
+            <div class="section-head">
+                <div class="ident-rail">
+                    <span class="rail-tag">04</span>
+                    <span class="rail-line"></span>
+                    <span class="rail-label" id="nodes-label">ACTIVE&nbsp;NODES</span>
+                </div>
+                <div class="section-meta">
+                    <span>HOVER&nbsp;A&nbsp;ROW&nbsp;TO&nbsp;INSPECT&nbsp;·&nbsp;CLICK&nbsp;<span class="kbd">×</span>&nbsp;TO&nbsp;TERMINATE</span>
+                </div>
+            </div>
+
+            <div class="table-frame">
                 <table class="ports-table" id="portsTable">
+                    <colgroup>
+                        <col class="col-port">
+                        <col class="col-proto">
+                        <col class="col-state">
+                        <col class="col-local">
+                        <col class="col-remote">
+                        <col class="col-pid">
+                        <col class="col-process">
+                        <col class="col-act">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th class="sortable" data-sort="port">
-                                Port
-                                <span class="sort-icon">↕</span>
+                                <span class="th-num">001</span> PORT <span class="sort-icon">↕</span>
                             </th>
                             <th class="sortable" data-sort="protocol">
-                                Protocol
-                                <span class="sort-icon">↕</span>
+                                <span class="th-num">002</span> PROTO <span class="sort-icon">↕</span>
                             </th>
                             <th class="sortable" data-sort="state">
-                                State
-                                <span class="sort-icon">↕</span>
+                                <span class="th-num">003</span> STATE <span class="sort-icon">↕</span>
                             </th>
-                            <th>Local Address</th>
-                            <th>Remote Address</th>
+                            <th>
+                                <span class="th-num">004</span> LOCAL&nbsp;ADDRESS
+                            </th>
+                            <th>
+                                <span class="th-num">005</span> REMOTE&nbsp;ADDRESS
+                            </th>
                             <th class="sortable" data-sort="pid">
-                                PID
-                                <span class="sort-icon">↕</span>
+                                <span class="th-num">006</span> PID <span class="sort-icon">↕</span>
                             </th>
                             <th class="sortable" data-sort="process_name">
-                                Process
-                                <span class="sort-icon">↕</span>
+                                <span class="th-num">007</span> PROCESS <span class="sort-icon">↕</span>
                             </th>
-                            <th>Actions</th>
+                            <th class="th-act">
+                                <span class="th-num">008</span> ACT
+                            </th>
                         </tr>
                     </thead>
                     <tbody id="portsTableBody">
                         <tr class="loading-row">
                             <td colspan="8">
-                                <div class="loading-spinner"></div>
-                                <span>Loading ports...</span>
+                                <div class="loading-block">
+                                    <span class="loading-pulse"></span>
+                                    <span class="loading-text">SCANNING&nbsp;PORTS&nbsp;<span class="loading-dots"></span></span>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class="table-footer">
-                <span class="results-count" id="resultsCount">-- results</span>
-            </div>
         </section>
 
-        <!-- Action Logs Drawer -->
-        <aside class="logs-drawer" id="logsDrawer">
-            <div class="drawer-header">
-                <h2>📋 Action Logs</h2>
-                <button class="btn btn-icon" id="closeDrawer">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
+        <!-- ============ STATUS BAR ============ -->
+        <footer class="statusbar">
+            <span class="sb-cell"><span class="sb-key">SYS</span><span class="sb-val">WIN32</span></span>
+            <span class="sb-cell"><span class="sb-key">MODE</span><span class="sb-val">INSPECT</span></span>
+            <span class="sb-cell"><span class="sb-key">RATE</span><span class="sb-val">5.0s</span></span>
+            <span class="sb-cell"><span class="sb-key">NODES</span><span class="sb-val" id="sbNodes">0</span></span>
+            <span class="sb-cell"><span class="sb-key">LAST&nbsp;SYNC</span><span class="sb-val" id="sbSync">--:--:--</span></span>
+            <span class="sb-cell sb-grow"></span>
+            <span class="sb-cell sb-blink">/_</span>
+        </footer>
+    </main>
+
+    <!-- Action Logs Drawer -->
+    <aside class="logs-drawer" id="logsDrawer">
+        <div class="drawer-header">
+            <div class="ident-rail">
+                <span class="rail-tag">L</span>
+                <span class="rail-line"></span>
+                <span class="rail-label">ACTION&nbsp;LOG</span>
             </div>
-            <div class="logs-content" id="logsContent">
-                <p class="no-logs">No actions logged yet</p>
-            </div>
-        </aside>
-        
-        <button class="fab" id="logsToggle" title="View Action Logs">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-            </svg>
-            <span class="fab-badge" id="logsBadge">0</span>
-        </button>
-    </div>
+            <button type="button" class="ctl ctl-ghost" id="closeDrawer" title="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="logs-content" id="logsContent">
+            <p class="no-logs">// NO ACTIONS RECORDED</p>
+        </div>
+    </aside>
+
+    <button type="button" class="fab" id="logsToggle" title="View action log">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <span class="fab-label">LOG</span>
+        <span class="fab-badge" id="logsBadge">0</span>
+    </button>
 
     <!-- Confirmation Modal -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal">
+            <div class="modal-bracket modal-bracket-tl" aria-hidden="true"></div>
+            <div class="modal-bracket modal-bracket-tr" aria-hidden="true"></div>
+            <div class="modal-bracket modal-bracket-bl" aria-hidden="true"></div>
+            <div class="modal-bracket modal-bracket-br" aria-hidden="true"></div>
+
             <div class="modal-header">
-                <h3>⚠️ Confirm Process Termination</h3>
+                <span class="modal-tag">! WARN</span>
+                <h3>CONFIRM&nbsp;PROCESS&nbsp;TERMINATION</h3>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to terminate this process?</p>
-                <div class="process-info" id="modalProcessInfo">
+                <p class="modal-lead">This will issue a termination signal to the target process. The action is logged and cannot be undone from this interface.</p>
+                <dl class="process-info" id="modalProcessInfo">
                     <div class="info-row">
-                        <span class="info-label">Process:</span>
-                        <span class="info-value" id="modalProcessName">--</span>
+                        <dt class="info-label">PROCESS</dt>
+                        <dd class="info-value" id="modalProcessName">--</dd>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">PID:</span>
-                        <span class="info-value" id="modalPid">--</span>
+                        <dt class="info-label">PID</dt>
+                        <dd class="info-value" id="modalPid">--</dd>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Port:</span>
-                        <span class="info-value" id="modalPort">--</span>
+                        <dt class="info-label">PORT</dt>
+                        <dd class="info-value" id="modalPort">--</dd>
                     </div>
-                </div>
+                </dl>
                 <label class="force-kill-option">
                     <input type="checkbox" id="forceKill">
-                    <span>Force terminate (SIGKILL) if normal terminate fails</span>
+                    <span class="fk-box" aria-hidden="true"></span>
+                    <span class="fk-text">ESCALATE&nbsp;TO&nbsp;<b>SIGKILL</b>&nbsp;IF&nbsp;NORMAL&nbsp;TERMINATE&nbsp;FAILS</span>
                 </label>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancelKill">Cancel</button>
-                <button class="btn btn-danger" id="confirmKill">Terminate Process</button>
+                <button type="button" class="btn btn-secondary" id="cancelKill">ABORT</button>
+                <button type="button" class="btn btn-danger" id="confirmKill">
+                    <span>TERMINATE</span>
+                    <span class="btn-arrow">›</span>
+                </button>
             </div>
         </div>
     </div>
